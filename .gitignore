@@ -3,6 +3,12 @@ node_modules/
 */node_modules/
 **/node_modules/
 
+# Large binary files (GitHub 100MB limit)
+*.node
+**/*.node
+**/next-swc.darwin-x64.node
+**/swc-*/*.node
+
 # Environment variables
 .env
 .env.local
