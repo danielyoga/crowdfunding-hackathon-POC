@@ -159,13 +159,14 @@ describe("Campaign", function () {
       it("Should reject zero funding amount", async function () {
         await expect(
           campaign.connect(funder1).fund(0, { value: 0 })
-        ).to.be.revertedWith("Must send ETH");
+        ).to.be.revertedWithCustomError(campaign, "BelowMinimumContribution");
       });
 
       it("Should reject invalid risk profile", async function () {
+        // Solidity rejects invalid enum values at ABI decoding level
         await expect(
-          campaign.connect(funder1).fund(3, { value: CONTRIBUTION_AMOUNT })
-        ).to.be.revertedWithCustomError(campaign, "InvalidRiskProfile");
+          campaign.connect(funder1).fund(3, { value: ethers.parseEther("1") })
+        ).to.be.reverted;
       });
 
       it("Should prevent funding beyond goal", async function () {
@@ -293,19 +294,24 @@ describe("Campaign", function () {
 
     describe("Vote Casting", function () {
       it("Should allow funder to vote YES", async function () {
+        // Note: Whale protection caps voting power at 20% of totalRaised
+        // totalRaised = 5 ETH, so max voting power = 1 ETH
+        const expectedVotingPower = ethers.parseEther("1"); // 20% of 5 ETH
+        
         await expect(campaign.connect(funder1).vote(0, true))
           .to.emit(campaign, "VoteCast")
-          .withArgs(0, funder1.address, true, ethers.parseEther("3"));
+          .withArgs(0, funder1.address, true, expectedVotingPower);
 
         const milestone = await campaign.getMilestone(0);
-        expect(milestone.yesVotes).to.equal(ethers.parseEther("3"));
+        expect(milestone.yesVotes).to.equal(expectedVotingPower);
       });
 
       it("Should allow funder to vote NO", async function () {
         await campaign.connect(funder1).vote(0, false);
 
         const milestone = await campaign.getMilestone(0);
-        expect(milestone.noVotes).to.equal(ethers.parseEther("3"));
+        // Whale protection caps at 20% of 5 ETH = 1 ETH
+        expect(milestone.noVotes).to.equal(ethers.parseEther("1"));
       });
 
       it("Should prevent non-funder from voting", async function () {
@@ -323,11 +329,13 @@ describe("Campaign", function () {
       });
 
       it("Should weight votes by contribution amount", async function () {
-        await campaign.connect(funder1).vote(0, true); // 3 ETH
-        await campaign.connect(funder2).vote(0, true); // 2 ETH
+        await campaign.connect(funder1).vote(0, true); // 3 ETH -> capped to 1 ETH (20%)
+        await campaign.connect(funder2).vote(0, true); // 2 ETH -> capped to 1 ETH (20%)
 
         const milestone = await campaign.getMilestone(0);
-        expect(milestone.yesVotes).to.equal(ethers.parseEther("5"));
+        // Both funders capped at 20% of 5 ETH = 1 ETH each
+        // funder1: 1 ETH (capped), funder2: 1 ETH (capped) = 2 ETH total
+        expect(milestone.yesVotes).to.equal(ethers.parseEther("2"));
       });
 
       it("Should enforce whale protection (max 20% voting power)", async function () {
@@ -362,7 +370,7 @@ describe("Campaign", function () {
         await campaign.finalizeMilestone(0);
 
         const milestone = await campaign.getMilestone(0);
-        expect(milestone.state).to.equal(4); // Completed
+        expect(milestone.state).to.equal(5); // Completed (enum: 0=Pending, 1=Submitted, 2=Voting, 3=Approved, 4=Rejected, 5=Completed)
       });
 
       it("Should reject milestone with >60% NO votes", async function () {

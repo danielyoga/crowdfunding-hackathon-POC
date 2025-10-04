@@ -2,7 +2,7 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/Campaign.sol": {
-      "lastModificationDate": 1759551198209,
+      "lastModificationDate": 1759551571468,
       "contentHash": "1a6f5cc02b7b16043dc744ed7ad74239",
       "sourceName": "contracts/Campaign.sol",
       "solcConfig": {
@@ -195,7 +195,7 @@
       ]
     },
     "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/CampaignFactory.sol": {
-      "lastModificationDate": 1759551225473,
+      "lastModificationDate": 1759551571468,
       "contentHash": "55d0792dedcda61a26317feead916905",
       "sourceName": "contracts/CampaignFactory.sol",
       "solcConfig": {
