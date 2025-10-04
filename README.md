@@ -290,3 +290,5 @@ This project was built for the Base Indonesia Workshop Hackathon, demonstrating:
 **Built with ❤️ for the Web3 community**
 
 *Empowering innovation through accountable crowdfunding*
+
+

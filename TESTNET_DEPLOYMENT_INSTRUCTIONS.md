@@ -137,3 +137,5 @@ This deployment process follows the Base Indonesia Workshop best practices and i
 - **Modern Frontend**: React/Next.js with Web3 integration
 
 Your Web3 Milestone Crowdfunding Platform is ready for the hackathon! 🚀
+
+
