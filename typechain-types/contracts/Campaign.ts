@@ -144,9 +144,11 @@ export interface CampaignInterface extends Interface {
     nameOrSignature:
       | "APPROVAL_THRESHOLD"
       | "MAX_WHALE_POWER"
+      | "MIN_CONTRIBUTION"
       | "VOTING_PERIOD"
       | "campaignData"
       | "claimRefund"
+      | "emergencyPause"
       | "finalizeMilestone"
       | "fund"
       | "funders"
@@ -160,18 +162,18 @@ export interface CampaignInterface extends Interface {
       | "hasVotedOnMilestone"
       | "milestones"
       | "owner"
+      | "pause"
       | "paused"
       | "renounceOwnership"
       | "submitMilestone"
       | "transferOwnership"
-      | "triggerEmergencyFailure"
+      | "unpause"
       | "vote"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
       | "CampaignStateChanged"
-      | "EmergencyFailureTriggered"
       | "FundReceived"
       | "FundsReleased"
       | "MilestoneCompleted"
@@ -180,6 +182,7 @@ export interface CampaignInterface extends Interface {
       | "OwnershipTransferred"
       | "Paused"
       | "RefundClaimed"
+      | "ReservesReleased"
       | "Unpaused"
       | "VoteCast"
   ): EventFragment;
@@ -193,6 +196,10 @@ export interface CampaignInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "MIN_CONTRIBUTION",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "VOTING_PERIOD",
     values?: undefined
   ): string;
@@ -202,6 +209,10 @@ export interface CampaignInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "claimRefund",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "emergencyPause",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -250,6 +261,7 @@ export interface CampaignInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(functionFragment: "pause", values?: undefined): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
@@ -263,10 +275,7 @@ export interface CampaignInterface extends Interface {
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
-  encodeFunctionData(
-    functionFragment: "triggerEmergencyFailure",
-    values?: undefined
-  ): string;
+  encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "vote",
     values: [BigNumberish, boolean]
@@ -281,6 +290,10 @@ export interface CampaignInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "MIN_CONTRIBUTION",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "VOTING_PERIOD",
     data: BytesLike
   ): Result;
@@ -290,6 +303,10 @@ export interface CampaignInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "claimRefund",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "emergencyPause",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -329,6 +346,7 @@ export interface CampaignInterface extends Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "milestones", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
@@ -342,10 +360,7 @@ export interface CampaignInterface extends Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "triggerEmergencyFailure",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "vote", data: BytesLike): Result;
 }
 
@@ -355,22 +370,6 @@ export namespace CampaignStateChangedEvent {
   export interface OutputObject {
     oldState: bigint;
     newState: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace EmergencyFailureTriggeredEvent {
-  export type InputTuple = [
-    initiator: AddressLike,
-    votingDeadline: BigNumberish
-  ];
-  export type OutputTuple = [initiator: string, votingDeadline: bigint];
-  export interface OutputObject {
-    initiator: string;
-    votingDeadline: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -547,6 +546,19 @@ export namespace RefundClaimedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
+export namespace ReservesReleasedEvent {
+  export type InputTuple = [founder: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [founder: string, amount: bigint];
+  export interface OutputObject {
+    founder: string;
+    amount: bigint;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
 export namespace UnpausedEvent {
   export type InputTuple = [account: AddressLike];
   export type OutputTuple = [account: string];
@@ -633,6 +645,8 @@ export interface Campaign extends BaseContract {
 
   MAX_WHALE_POWER: TypedContractMethod<[], [bigint], "view">;
 
+  MIN_CONTRIBUTION: TypedContractMethod<[], [bigint], "view">;
+
   VOTING_PERIOD: TypedContractMethod<[], [bigint], "view">;
 
   campaignData: TypedContractMethod<
@@ -668,6 +682,8 @@ export interface Campaign extends BaseContract {
   >;
 
   claimRefund: TypedContractMethod<[], [void], "nonpayable">;
+
+  emergencyPause: TypedContractMethod<[], [void], "nonpayable">;
 
   finalizeMilestone: TypedContractMethod<
     [milestoneId: BigNumberish],
@@ -776,6 +792,8 @@ export interface Campaign extends BaseContract {
 
   owner: TypedContractMethod<[], [string], "view">;
 
+  pause: TypedContractMethod<[], [void], "nonpayable">;
+
   paused: TypedContractMethod<[], [boolean], "view">;
 
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
@@ -792,7 +810,7 @@ export interface Campaign extends BaseContract {
     "nonpayable"
   >;
 
-  triggerEmergencyFailure: TypedContractMethod<[], [void], "nonpayable">;
+  unpause: TypedContractMethod<[], [void], "nonpayable">;
 
   vote: TypedContractMethod<
     [milestoneId: BigNumberish, support: boolean],
@@ -809,6 +827,9 @@ export interface Campaign extends BaseContract {
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "MAX_WHALE_POWER"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MIN_CONTRIBUTION"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "VOTING_PERIOD"
@@ -848,6 +869,9 @@ export interface Campaign extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "claimRefund"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "emergencyPause"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "finalizeMilestone"
@@ -958,6 +982,9 @@ export interface Campaign extends BaseContract {
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
+    nameOrSignature: "pause"
+  ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
     nameOrSignature: "paused"
   ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
@@ -974,7 +1001,7 @@ export interface Campaign extends BaseContract {
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "triggerEmergencyFailure"
+    nameOrSignature: "unpause"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "vote"
@@ -990,13 +1017,6 @@ export interface Campaign extends BaseContract {
     CampaignStateChangedEvent.InputTuple,
     CampaignStateChangedEvent.OutputTuple,
     CampaignStateChangedEvent.OutputObject
-  >;
-  getEvent(
-    key: "EmergencyFailureTriggered"
-  ): TypedContractEvent<
-    EmergencyFailureTriggeredEvent.InputTuple,
-    EmergencyFailureTriggeredEvent.OutputTuple,
-    EmergencyFailureTriggeredEvent.OutputObject
   >;
   getEvent(
     key: "FundReceived"
@@ -1055,6 +1075,13 @@ export interface Campaign extends BaseContract {
     RefundClaimedEvent.OutputObject
   >;
   getEvent(
+    key: "ReservesReleased"
+  ): TypedContractEvent<
+    ReservesReleasedEvent.InputTuple,
+    ReservesReleasedEvent.OutputTuple,
+    ReservesReleasedEvent.OutputObject
+  >;
+  getEvent(
     key: "Unpaused"
   ): TypedContractEvent<
     UnpausedEvent.InputTuple,
@@ -1079,17 +1106,6 @@ export interface Campaign extends BaseContract {
       CampaignStateChangedEvent.InputTuple,
       CampaignStateChangedEvent.OutputTuple,
       CampaignStateChangedEvent.OutputObject
-    >;
-
-    "EmergencyFailureTriggered(address,uint256)": TypedContractEvent<
-      EmergencyFailureTriggeredEvent.InputTuple,
-      EmergencyFailureTriggeredEvent.OutputTuple,
-      EmergencyFailureTriggeredEvent.OutputObject
-    >;
-    EmergencyFailureTriggered: TypedContractEvent<
-      EmergencyFailureTriggeredEvent.InputTuple,
-      EmergencyFailureTriggeredEvent.OutputTuple,
-      EmergencyFailureTriggeredEvent.OutputObject
     >;
 
     "FundReceived(address,uint256,uint8,uint256,uint256)": TypedContractEvent<
@@ -1178,6 +1194,17 @@ export interface Campaign extends BaseContract {
       RefundClaimedEvent.InputTuple,
       RefundClaimedEvent.OutputTuple,
       RefundClaimedEvent.OutputObject
+    >;
+
+    "ReservesReleased(address,uint256)": TypedContractEvent<
+      ReservesReleasedEvent.InputTuple,
+      ReservesReleasedEvent.OutputTuple,
+      ReservesReleasedEvent.OutputObject
+    >;
+    ReservesReleased: TypedContractEvent<
+      ReservesReleasedEvent.InputTuple,
+      ReservesReleasedEvent.OutputTuple,
+      ReservesReleasedEvent.OutputObject
     >;
 
     "Unpaused(address)": TypedContractEvent<

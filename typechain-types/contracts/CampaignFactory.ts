@@ -26,7 +26,16 @@ import type {
 export interface CampaignFactoryInterface extends Interface {
   getFunction(
     nameOrSignature:
+      | "MAX_DESCRIPTION_LENGTH"
+      | "MAX_FUNDING_GOAL"
+      | "MAX_MILESTONE_DEADLINE"
+      | "MAX_MILESTONE_PERCENTAGE"
       | "MAX_PLATFORM_FEE"
+      | "MAX_TITLE_LENGTH"
+      | "MIN_FUNDING_GOAL"
+      | "MIN_MILESTONE_DEADLINE"
+      | "MIN_MILESTONE_PERCENTAGE"
+      | "MIN_TITLE_LENGTH"
       | "activeCampaigns"
       | "allCampaigns"
       | "campaignCount"
@@ -60,7 +69,43 @@ export interface CampaignFactoryInterface extends Interface {
   ): EventFragment;
 
   encodeFunctionData(
+    functionFragment: "MAX_DESCRIPTION_LENGTH",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_FUNDING_GOAL",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_MILESTONE_DEADLINE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_MILESTONE_PERCENTAGE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "MAX_PLATFORM_FEE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MAX_TITLE_LENGTH",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MIN_FUNDING_GOAL",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MIN_MILESTONE_DEADLINE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MIN_MILESTONE_PERCENTAGE",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "MIN_TITLE_LENGTH",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -153,7 +198,43 @@ export interface CampaignFactoryInterface extends Interface {
   ): string;
 
   decodeFunctionResult(
+    functionFragment: "MAX_DESCRIPTION_LENGTH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_FUNDING_GOAL",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_MILESTONE_DEADLINE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_MILESTONE_PERCENTAGE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "MAX_PLATFORM_FEE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MAX_TITLE_LENGTH",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MIN_FUNDING_GOAL",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MIN_MILESTONE_DEADLINE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MIN_MILESTONE_PERCENTAGE",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "MIN_TITLE_LENGTH",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -364,7 +445,25 @@ export interface CampaignFactory extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
+  MAX_DESCRIPTION_LENGTH: TypedContractMethod<[], [bigint], "view">;
+
+  MAX_FUNDING_GOAL: TypedContractMethod<[], [bigint], "view">;
+
+  MAX_MILESTONE_DEADLINE: TypedContractMethod<[], [bigint], "view">;
+
+  MAX_MILESTONE_PERCENTAGE: TypedContractMethod<[], [bigint], "view">;
+
   MAX_PLATFORM_FEE: TypedContractMethod<[], [bigint], "view">;
+
+  MAX_TITLE_LENGTH: TypedContractMethod<[], [bigint], "view">;
+
+  MIN_FUNDING_GOAL: TypedContractMethod<[], [bigint], "view">;
+
+  MIN_MILESTONE_DEADLINE: TypedContractMethod<[], [bigint], "view">;
+
+  MIN_MILESTONE_PERCENTAGE: TypedContractMethod<[], [bigint], "view">;
+
+  MIN_TITLE_LENGTH: TypedContractMethod<[], [bigint], "view">;
 
   activeCampaigns: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
 
@@ -479,7 +578,34 @@ export interface CampaignFactory extends BaseContract {
   ): T;
 
   getFunction(
+    nameOrSignature: "MAX_DESCRIPTION_LENGTH"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MAX_FUNDING_GOAL"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MAX_MILESTONE_DEADLINE"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MAX_MILESTONE_PERCENTAGE"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "MAX_PLATFORM_FEE"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MAX_TITLE_LENGTH"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MIN_FUNDING_GOAL"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MIN_MILESTONE_DEADLINE"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MIN_MILESTONE_PERCENTAGE"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "MIN_TITLE_LENGTH"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "activeCampaigns"

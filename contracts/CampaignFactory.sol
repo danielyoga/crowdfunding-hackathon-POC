@@ -18,6 +18,17 @@ contract CampaignFactory is Ownable, ReentrancyGuard {
     uint256 public constant MAX_PLATFORM_FEE = 500; // 5% maximum
     uint256 public campaignCreationFee = 0.01 ether; // Fee to create a campaign
     
+    // Validation constants
+    uint256 public constant MIN_FUNDING_GOAL = 0.01 ether;
+    uint256 public constant MAX_FUNDING_GOAL = 10000 ether;
+    uint256 public constant MIN_TITLE_LENGTH = 3;
+    uint256 public constant MAX_TITLE_LENGTH = 100;
+    uint256 public constant MAX_DESCRIPTION_LENGTH = 1000;
+    uint256 public constant MIN_MILESTONE_PERCENTAGE = 500; // 5%
+    uint256 public constant MAX_MILESTONE_PERCENTAGE = 5000; // 50%
+    uint256 public constant MIN_MILESTONE_DEADLINE = 7; // 7 days minimum
+    uint256 public constant MAX_MILESTONE_DEADLINE = 365; // 1 year maximum
+    
     // Mappings
     mapping(uint256 => address) public campaigns;
     mapping(address => uint256[]) public founderCampaigns;
@@ -74,16 +85,60 @@ contract CampaignFactory is Ownable, ReentrancyGuard {
             revert InsufficientCreationFee();
         }
         
+        // Validate title
+        uint256 titleLength = bytes(title).length;
+        require(
+            titleLength >= MIN_TITLE_LENGTH && titleLength <= MAX_TITLE_LENGTH,
+            "Invalid title length"
+        );
+        
+        // Validate description
+        uint256 descLength = bytes(description).length;
+        require(
+            descLength > 0 && descLength <= MAX_DESCRIPTION_LENGTH,
+            "Invalid description"
+        );
+        
         // Validate funding goal
-        if (fundingGoal == 0) {
-            revert InvalidFundingGoal();
+        require(
+            fundingGoal >= MIN_FUNDING_GOAL && fundingGoal <= MAX_FUNDING_GOAL,
+            "Invalid funding goal"
+        );
+        
+        // Validate milestone descriptions (not empty)
+        for (uint256 i = 0; i < 5; i++) {
+            require(bytes(milestoneDescriptions[i]).length > 0, "Empty milestone description");
         }
         
-        // Validate milestone percentages sum to 100%
+        // Validate milestone deadlines (chronological and within range)
+        for (uint256 i = 0; i < 5; i++) {
+            require(
+                milestoneDeadlines[i] >= MIN_MILESTONE_DEADLINE &&
+                milestoneDeadlines[i] <= MAX_MILESTONE_DEADLINE,
+                "Milestone deadline out of range"
+            );
+            
+            // Check chronological order (except first)
+            if (i > 0) {
+                require(
+                    milestoneDeadlines[i] > milestoneDeadlines[i-1],
+                    "Deadlines must be chronological"
+                );
+            }
+        }
+        
+        // Validate milestone percentages (individual and total)
         uint256 totalPercentage = 0;
         for (uint256 i = 0; i < 5; i++) {
+            require(
+                milestonePercentages[i] >= MIN_MILESTONE_PERCENTAGE &&
+                milestonePercentages[i] <= MAX_MILESTONE_PERCENTAGE,
+                "Milestone percentage out of range"
+            );
             totalPercentage += milestonePercentages[i];
         }
+        
+        // Ensure percentages sum to exactly 100%
         if (totalPercentage != 10000) { // 100% in basis points
             revert InvalidMilestoneCount();
         }

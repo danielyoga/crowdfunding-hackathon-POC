@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/Campaign.sol": {
-      "lastModificationDate": 1759395964257,
-      "contentHash": "37298596fd90d3bd5aae5c7488be11b8",
+      "lastModificationDate": 1759551198209,
+      "contentHash": "1a6f5cc02b7b16043dc744ed7ad74239",
       "sourceName": "contracts/Campaign.sol",
       "solcConfig": {
         "version": "0.8.26",
@@ -195,8 +195,8 @@
       ]
     },
     "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/CampaignFactory.sol": {
-      "lastModificationDate": 1759395964257,
-      "contentHash": "12f2237bc7652d4e6a01c4edf3b878ca",
+      "lastModificationDate": 1759551225473,
+      "contentHash": "55d0792dedcda61a26317feead916905",
       "sourceName": "contracts/CampaignFactory.sol",
       "solcConfig": {
         "version": "0.8.26",
@@ -236,8 +236,8 @@
       ]
     },
     "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/Governance.sol": {
-      "lastModificationDate": 1759395964258,
-      "contentHash": "68af5137de88de7661357efe15d415a5",
+      "lastModificationDate": 1759548393650,
+      "contentHash": "a94490bc3a77f46d914bd922bbe48d63",
       "sourceName": "contracts/Governance.sol",
       "solcConfig": {
         "version": "0.8.26",

@@ -71,6 +71,7 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
     uint256 public constant VOTING_PERIOD = 7 days;
     uint256 public constant APPROVAL_THRESHOLD = 6000; // 60% in basis points
     uint256 public constant MAX_WHALE_POWER = 2000;    // 20% max voting power per funder
+    uint256 public constant MIN_CONTRIBUTION = 0.001 ether; // Minimum contribution amount
     
     // Events
     event FundReceived(
@@ -122,7 +123,7 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
     
     event CampaignStateChanged(CampaignState oldState, CampaignState newState);
     
-    event EmergencyFailureTriggered(address indexed initiator, uint256 votingDeadline);
+    event ReservesReleased(address indexed founder, uint256 amount);
     
     // Custom errors
     error CampaignNotActive();
@@ -142,6 +143,7 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
     error VotingStillActive();
     error MaxRejectionsReached();
     error InvalidVotingPower();
+    error BelowMinimumContribution();
     
     modifier onlyFounder() {
         if (msg.sender != campaignData.founder) revert OnlyFounder();
@@ -204,7 +206,8 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
      * @notice Fund the campaign with chosen risk profile
      * @param riskProfile 0=Conservative(50/50), 1=Balanced(70/30), 2=Aggressive(90/10)
      */
-    function fund(RiskProfile riskProfile) external payable nonReentrant campaignActive {
+    function fund(RiskProfile riskProfile) external payable nonReentrant campaignActive whenNotPaused {
+        if (msg.value < MIN_CONTRIBUTION) revert BelowMinimumContribution();
         require(msg.value > 0, "Must send ETH");
         
         if (uint8(riskProfile) > 2) revert InvalidRiskProfile();
@@ -266,6 +269,7 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
         external 
         onlyFounder 
         campaignActive 
+        whenNotPaused
     {
         if (milestoneId != campaignData.currentMilestone) revert InvalidMilestone();
         if (milestones[milestoneId].state != MilestoneState.Pending) revert MilestoneNotPending();
@@ -298,7 +302,7 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
     /**
      * @notice Vote on milestone (funders only)
      */
-    function vote(uint256 milestoneId, bool support) external onlyFunder campaignActive {
+    function vote(uint256 milestoneId, bool support) external onlyFunder campaignActive whenNotPaused {
         if (milestones[milestoneId].state != MilestoneState.Voting) revert VotingNotActive();
         if (hasVotedOnMilestone[milestoneId][msg.sender]) revert AlreadyVoted();
         if (block.timestamp > milestones[milestoneId].votingDeadline) {
@@ -426,25 +430,40 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @notice Release funds to founder
+     * @notice Release funds to founder (SECURE: Checks-Effects-Interactions)
      */
     function _releaseFunds(uint256 milestoneId) internal {
         uint256 releaseAmount = _calculateReleaseAmount(milestoneId);
         
         if (releaseAmount > 0) {
-            payable(campaignData.founder).transfer(releaseAmount);
+            // EFFECTS: Update state FIRST
+            milestones[milestoneId].state = MilestoneState.Completed;
+            
+            // INTERACTIONS: External call LAST with proper error handling
+            (bool success, ) = payable(campaignData.founder).call{value: releaseAmount}("");
+            require(success, "Fund transfer failed");
+            
             emit FundsReleased(milestoneId, releaseAmount, campaignData.founder);
+        } else {
+            milestones[milestoneId].state = MilestoneState.Completed;
         }
-        
-        milestones[milestoneId].state = MilestoneState.Completed;
     }
     
     /**
-     * @notice Release all reserve funds to founder (called when campaign completes)
+     * @notice Release all reserve funds to founder (SECURE: Checks-Effects-Interactions)
      */
     function _releaseReserves() internal {
-        if (campaignData.totalReservePool > 0) {
-            payable(campaignData.founder).transfer(campaignData.totalReservePool);
+        uint256 reserveAmount = campaignData.totalReservePool;
+        
+        if (reserveAmount > 0) {
+            // EFFECTS: Clear reserve pool FIRST
+            campaignData.totalReservePool = 0;
+            
+            // INTERACTIONS: Transfer LAST with proper error handling
+            (bool success, ) = payable(campaignData.founder).call{value: reserveAmount}("");
+            require(success, "Reserve transfer failed");
+            
+            emit ReservesReleased(campaignData.founder, reserveAmount);
         }
     }
     
@@ -458,7 +477,8 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @notice Claim refund (funders only, when campaign failed)
+     * @notice Claim refund (funders only, when campaign failed) - SECURE
+     * @dev Refunds work even when paused (important for funder protection)
      */
     function claimRefund() external nonReentrant onlyFunder {
         if (campaignData.state != CampaignState.Failed) revert RefundNotAvailable();
@@ -471,11 +491,12 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
         
         if (refundAmount == 0) revert InsufficientFunds();
         
-        // Mark as refunded
+        // EFFECTS: Mark as refunded FIRST
         funder.hasRefunded = true;
         
-        // Transfer refund
-        payable(msg.sender).transfer(refundAmount);
+        // INTERACTIONS: Transfer LAST with call() instead of transfer()
+        (bool success, ) = payable(msg.sender).call{value: refundAmount}("");
+        require(success, "Refund transfer failed");
         
         emit RefundClaimed(msg.sender, refundAmount, funder.totalContribution);
     }
@@ -503,12 +524,27 @@ contract Campaign is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @notice Emergency failure vote (funders can trigger)
+     * @notice Pause the campaign (founder only)
+     * @dev Stops all funding, voting, and milestone submissions
      */
-    function triggerEmergencyFailure() external onlyFunder {
-        // Implementation for emergency failure voting
-        // This would require a separate voting mechanism
-        emit EmergencyFailureTriggered(msg.sender, block.timestamp + VOTING_PERIOD);
+    function pause() external onlyFounder {
+        _pause();
+    }
+    
+    /**
+     * @notice Unpause the campaign (founder only)
+     */
+    function unpause() external onlyFounder {
+        _unpause();
+    }
+    
+    /**
+     * @notice Emergency pause by platform owner
+     * @dev Allows platform to pause campaign in case of security issues
+     */
+    function emergencyPause() external {
+        require(msg.sender == owner(), "Only owner can emergency pause");
+        _pause();
     }
     
     // View functions

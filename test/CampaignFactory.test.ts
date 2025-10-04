@@ -43,7 +43,7 @@ describe("CampaignFactory", function () {
     ];
     
     const milestoneDeadlines: [bigint, bigint, bigint, bigint, bigint] = [
-      90n, 120n, 90n, 120n, 60n
+      30n, 90n, 150n, 240n, 330n  // Cumulative (within 365 max)
     ];
     
     const milestonePercentages: [bigint, bigint, bigint, bigint, bigint] = [
@@ -98,6 +98,24 @@ describe("CampaignFactory", function () {
           { value: CREATION_FEE }
         )
       ).to.be.revertedWithCustomError(campaignFactory, "InvalidMilestoneCount");
+    });
+
+    it("Should fail with non-chronological deadlines", async function () {
+      const badDeadlines: [bigint, bigint, bigint, bigint, bigint] = [
+        90n, 80n, 120n, 150n, 180n  // 80 < 90!
+      ];
+
+      await expect(
+        campaignFactory.connect(founder).createCampaign(
+          "Test Campaign",
+          "A test crowdfunding campaign",
+          FUNDING_GOAL,
+          milestoneDescriptions,
+          badDeadlines,
+          milestonePercentages,
+          { value: CREATION_FEE }
+        )
+      ).to.be.revertedWith("Deadlines must be chronological");
     });
 
     it("Should track founder campaigns", async function () {
@@ -165,7 +183,7 @@ describe("CampaignFactory", function () {
       ];
       
       const milestoneDeadlines: [bigint, bigint, bigint, bigint, bigint] = [
-        90n, 120n, 90n, 120n, 60n
+        30n, 90n, 150n, 240n, 330n  // Cumulative (within 365 max)
       ];
       
       const milestonePercentages: [bigint, bigint, bigint, bigint, bigint] = [
@@ -205,7 +223,7 @@ describe("CampaignFactory", function () {
       ];
       
       const milestoneDeadlines: [bigint, bigint, bigint, bigint, bigint] = [
-        90n, 120n, 90n, 120n, 60n
+        30n, 90n, 150n, 240n, 330n  // Cumulative (within 365 max)
       ];
       
       const milestonePercentages: [bigint, bigint, bigint, bigint, bigint] = [
