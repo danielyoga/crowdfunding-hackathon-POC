@@ -1088,3 +1088,4 @@ if (!condition) revert CustomError(); // Cheaper
 ---
 
 **Built with security and efficiency in mind** 🔒
+
