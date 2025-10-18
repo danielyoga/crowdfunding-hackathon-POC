@@ -1,47 +1,6 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/Campaign.sol": {
-      "lastModificationDate": 1759551571468,
-      "contentHash": "1a6f5cc02b7b16043dc744ed7ad74239",
-      "sourceName": "contracts/Campaign.sol",
-      "solcConfig": {
-        "version": "0.8.26",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 200
-          },
-          "viaIR": true,
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "@openzeppelin/contracts/utils/Pausable.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.26"
-      ],
-      "artifacts": [
-        "Campaign"
-      ]
-    },
     "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/node_modules/@openzeppelin/contracts/access/Ownable.sol": {
       "lastModificationDate": 1759395875435,
       "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
@@ -194,10 +153,10 @@
         "Context"
       ]
     },
-    "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/CampaignFactory.sol": {
-      "lastModificationDate": 1759551571468,
-      "contentHash": "55d0792dedcda61a26317feead916905",
-      "sourceName": "contracts/CampaignFactory.sol",
+    "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/SimpleCampaign.sol": {
+      "lastModificationDate": 1760767679191,
+      "contentHash": "c0de5c8eaef8dcb0fca984b44e3425f7",
+      "sourceName": "contracts/SimpleCampaign.sol",
       "solcConfig": {
         "version": "0.8.26",
         "settings": {
@@ -224,7 +183,6 @@
         }
       },
       "imports": [
-        "./Campaign.sol",
         "@openzeppelin/contracts/access/Ownable.sol",
         "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
       ],
@@ -232,13 +190,13 @@
         "^0.8.26"
       ],
       "artifacts": [
-        "CampaignFactory"
+        "SimpleCampaign"
       ]
     },
-    "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/Governance.sol": {
-      "lastModificationDate": 1759548393650,
-      "contentHash": "a94490bc3a77f46d914bd922bbe48d63",
-      "sourceName": "contracts/Governance.sol",
+    "/Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/contracts/SimpleFactory.sol": {
+      "lastModificationDate": 1760767679182,
+      "contentHash": "b0b98ce3fd3d5b53b9ee30289068873e",
+      "sourceName": "contracts/SimpleFactory.sol",
       "solcConfig": {
         "version": "0.8.26",
         "settings": {
@@ -265,14 +223,14 @@
         }
       },
       "imports": [
-        "@openzeppelin/contracts/access/Ownable.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
+        "./SimpleCampaign.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
       ],
       "versionPragmas": [
         "^0.8.26"
       ],
       "artifacts": [
-        "Governance"
+        "SimpleFactory"
       ]
     }
   }
