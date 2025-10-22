@@ -1,1 +1,7 @@
-{}
+{
+  "/page": "app/page.js",
+  "/my-campaigns/page": "app/my-campaigns/page.js",
+  "/founder/campaign/[address]/page": "app/founder/campaign/[address]/page.js",
+  "/my-investments/page": "app/my-investments/page.js",
+  "/browse/page": "app/browse/page.js"
+}

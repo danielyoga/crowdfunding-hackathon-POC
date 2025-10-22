@@ -520,7 +520,7 @@ async function getCampaignDetails(campaignAddress: string) {
   
   // Get all milestones
   const milestones = await Promise.all(
-    [0, 1, 2, 3, 4].map(id => campaign.getMilestone(id))
+    [0, 1, 2].map(id => campaign.getMilestone(id))
   );
   
   // Get funders list

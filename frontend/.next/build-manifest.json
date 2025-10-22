@@ -10,8 +10,10 @@
   ],
   "rootMainFiles": [
     "static/chunks/webpack.js",
+    "static/chunks/npm.next.js",
     "static/chunks/main-app.js"
   ],
+  "rootMainFilesTree": {},
   "pages": {
     "/_app": []
   },
