@@ -1,7 +1,7 @@
 {
+  "/browse/page": "app/browse/page.js",
+  "/page": "app/page.js",
   "/create/page": "app/create/page.js",
   "/my-campaigns/page": "app/my-campaigns/page.js",
-  "/page": "app/page.js",
-  "/campaign/[address]/page": "app/campaign/[address]/page.js",
-  "/browse/page": "app/browse/page.js"
+  "/campaign/[address]/page": "app/campaign/[address]/page.js"
 }
