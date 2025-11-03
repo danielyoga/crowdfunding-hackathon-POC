@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import { SimpleFactory, SimpleCampaign } from "../typechain-types";
+import { SimpleFactory, SimpleProject } from "../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 describe("SimpleFactory", function () {
@@ -35,19 +35,19 @@ describe("SimpleFactory", function () {
     });
 
     it("Should initialize with correct default values", async function () {
-      expect(await factory.campaignCount()).to.equal(0);
+      expect(await factory.projectCount()).to.equal(0);
       expect(await factory.creationFee()).to.equal(CREATION_FEE);
     });
 
     it("Should start with zero campaigns", async function () {
-      const allCampaigns = await factory.getAllCampaigns();
+      const allCampaigns = await factory.getAllProjects();
       expect(allCampaigns.length).to.equal(0);
     });
   });
 
   describe("Campaign Creation", function () {
     it("Should create campaign with correct data", async function () {
-      const tx = await factory.connect(founder).createCampaign(
+      const tx = await factory.connect(founder).createProject(
         "Test Campaign",
         "A test crowdfunding campaign",
         FUNDING_GOAL,
@@ -57,15 +57,15 @@ describe("SimpleFactory", function () {
       );
       
       await expect(tx)
-        .to.emit(factory, "CampaignCreated")
-        .withArgs(0, await factory.campaigns(0), await founder.getAddress(), "Test Campaign", FUNDING_GOAL);
+        .to.emit(factory, "ProjectCreated")
+        .withArgs(0, await factory.projects(0), await founder.getAddress(), "Test Campaign", FUNDING_GOAL);
 
-      expect(await factory.campaignCount()).to.equal(1);
-      expect(await factory.campaigns(0)).to.not.equal(ethers.ZeroAddress);
+      expect(await factory.projectCount()).to.equal(1);
+      expect(await factory.projects(0)).to.not.equal(ethers.ZeroAddress);
     });
 
     it("Should track founder campaigns", async function () {
-      await factory.connect(founder).createCampaign(
+      await factory.connect(founder).createProject(
         "Test Campaign 1",
         "First campaign",
         FUNDING_GOAL,
@@ -74,7 +74,7 @@ describe("SimpleFactory", function () {
         { value: CREATION_FEE }
       );
 
-      await factory.connect(founder).createCampaign(
+      await factory.connect(founder).createProject(
         "Test Campaign 2",
         "Second campaign",
         FUNDING_GOAL,
@@ -83,14 +83,14 @@ describe("SimpleFactory", function () {
         { value: CREATION_FEE }
       );
 
-      const founderCampaigns = await factory.getFounderCampaigns(await founder.getAddress());
+      const founderCampaigns = await factory.getFounderProjects(await founder.getAddress());
       expect(founderCampaigns.length).to.equal(2);
       expect(founderCampaigns[0]).to.equal(0);
       expect(founderCampaigns[1]).to.equal(1);
     });
 
     it("Should track all campaigns", async function () {
-      await factory.connect(founder).createCampaign(
+      await factory.connect(founder).createProject(
         "Campaign 1",
         "First campaign",
         FUNDING_GOAL,
@@ -99,7 +99,7 @@ describe("SimpleFactory", function () {
         { value: CREATION_FEE }
       );
 
-      await factory.connect(contributor1).createCampaign(
+      await factory.connect(contributor1).createProject(
         "Campaign 2",
         "Second campaign",
         FUNDING_GOAL,
@@ -108,13 +108,13 @@ describe("SimpleFactory", function () {
         { value: CREATION_FEE }
       );
 
-      const allCampaigns = await factory.getAllCampaigns();
+      const allCampaigns = await factory.getAllProjects();
       expect(allCampaigns.length).to.equal(2);
     });
 
     it("Should prevent creation with insufficient fee", async function () {
       await expect(
-        factory.connect(founder).createCampaign(
+        factory.connect(founder).createProject(
           "Test Campaign",
           "A test campaign",
           FUNDING_GOAL,
@@ -127,7 +127,7 @@ describe("SimpleFactory", function () {
 
     it("Should prevent creation with invalid funding goal", async function () {
       await expect(
-        factory.connect(founder).createCampaign(
+        factory.connect(founder).createProject(
           "Test Campaign",
           "A test campaign",
           ethers.parseEther("0.005"), // Too low
@@ -138,7 +138,7 @@ describe("SimpleFactory", function () {
       ).to.be.revertedWith("Invalid funding goal");
 
       await expect(
-        factory.connect(founder).createCampaign(
+        factory.connect(founder).createProject(
           "Test Campaign",
           "A test campaign",
           ethers.parseEther("1001"), // Too high
@@ -197,7 +197,7 @@ describe("SimpleFactory", function () {
     it("Should create campaign with exact funding goal limits", async function () {
       // Test minimum funding goal
       await expect(
-        factory.connect(founder).createCampaign(
+        factory.connect(founder).createProject(
           "Min Campaign",
           "Minimum funding goal",
           ethers.parseEther("0.01"), // Minimum allowed
@@ -209,7 +209,7 @@ describe("SimpleFactory", function () {
 
       // Test maximum funding goal
       await expect(
-        factory.connect(founder).createCampaign(
+        factory.connect(founder).createProject(
           "Max Campaign",
           "Maximum funding goal",
           ethers.parseEther("1000"), // Maximum allowed
@@ -222,10 +222,10 @@ describe("SimpleFactory", function () {
   });
 
   describe("Campaign Management", function () {
-    let campaign: SimpleCampaign;
+    let campaign: SimpleProject;
 
     beforeEach(async function () {
-      await factory.connect(founder).createCampaign(
+      await factory.connect(founder).createProject(
         "Test Campaign",
         "A test campaign",
         FUNDING_GOAL,
@@ -234,25 +234,25 @@ describe("SimpleFactory", function () {
         { value: CREATION_FEE }
       );
 
-      const campaignAddress = await factory.campaigns(0);
-      const SimpleCampaign = await ethers.getContractFactory("SimpleCampaign");
-      campaign = SimpleCampaign.attach(campaignAddress) as SimpleCampaign;
+      const campaignAddress = await factory.projects(0);
+      const SimpleProject = await ethers.getContractFactory("SimpleProject");
+      campaign = SimpleProject.attach(campaignAddress) as SimpleProject;
     });
 
     it("Should get campaign by ID", async function () {
-      const campaignAddress = await factory.getCampaign(0);
+      const campaignAddress = await factory.getProject(0);
       expect(campaignAddress).to.equal(await campaign.getAddress());
     });
 
     it("Should return zero address for non-existent campaign", async function () {
-      const campaignAddress = await factory.getCampaign(999);
+      const campaignAddress = await factory.getProject(999);
       expect(campaignAddress).to.equal(ethers.ZeroAddress);
     });
 
     it("Should track campaign count correctly", async function () {
-      expect(await factory.campaignCount()).to.equal(1);
+      expect(await factory.projectCount()).to.equal(1);
 
-      await factory.connect(contributor1).createCampaign(
+      await factory.connect(contributor1).createProject(
         "Another Campaign",
         "Second campaign",
         FUNDING_GOAL,
@@ -261,7 +261,7 @@ describe("SimpleFactory", function () {
         { value: CREATION_FEE }
       );
 
-      expect(await factory.campaignCount()).to.equal(2);
+      expect(await factory.projectCount()).to.equal(2);
     });
   });
 
@@ -286,7 +286,7 @@ describe("SimpleFactory", function () {
 
     it("Should allow owner to withdraw fees", async function () {
       // Create a campaign to generate fees
-      await factory.connect(founder).createCampaign(
+      await factory.connect(founder).createProject(
         "Test Campaign",
         "A test campaign",
         FUNDING_GOAL,
@@ -321,7 +321,7 @@ describe("SimpleFactory", function () {
     });
 
     it("Should get platform statistics", async function () {
-      await factory.connect(founder).createCampaign(
+      await factory.connect(founder).createProject(
         "Test Campaign",
         "A test campaign",
         FUNDING_GOAL,
@@ -331,7 +331,7 @@ describe("SimpleFactory", function () {
       );
 
       const stats = await factory.getPlatformStats();
-      expect(stats.totalCampaigns).to.equal(1);
+      expect(stats.totalProjects).to.equal(1);
       expect(stats.currentCreationFee).to.equal(CREATION_FEE);
     });
   });
@@ -339,7 +339,7 @@ describe("SimpleFactory", function () {
   describe("Edge Cases", function () {
     it("Should handle multiple campaigns from same founder", async function () {
       for (let i = 0; i < 3; i++) {
-        await factory.connect(founder).createCampaign(
+        await factory.connect(founder).createProject(
           `Campaign ${i}`,
           `Campaign number ${i}`,
           FUNDING_GOAL,
@@ -349,14 +349,14 @@ describe("SimpleFactory", function () {
         );
       }
 
-      expect(await factory.campaignCount()).to.equal(3);
+      expect(await factory.projectCount()).to.equal(3);
       
-      const founderCampaigns = await factory.getFounderCampaigns(await founder.getAddress());
+      const founderCampaigns = await factory.getFounderProjects(await founder.getAddress());
       expect(founderCampaigns.length).to.equal(3);
     });
 
     it("Should handle campaigns from different founders", async function () {
-      await factory.connect(founder).createCampaign(
+      await factory.connect(founder).createProject(
         "Founder 1 Campaign",
         "First founder's campaign",
         FUNDING_GOAL,
@@ -365,7 +365,7 @@ describe("SimpleFactory", function () {
         { value: CREATION_FEE }
       );
 
-      await factory.connect(contributor1).createCampaign(
+      await factory.connect(contributor1).createProject(
         "Founder 2 Campaign",
         "Second founder's campaign",
         FUNDING_GOAL,
@@ -374,10 +374,10 @@ describe("SimpleFactory", function () {
         { value: CREATION_FEE }
       );
 
-      expect(await factory.campaignCount()).to.equal(2);
+      expect(await factory.projectCount()).to.equal(2);
       
-      const founder1Campaigns = await factory.getFounderCampaigns(await founder.getAddress());
-      const founder2Campaigns = await factory.getFounderCampaigns(await contributor1.getAddress());
+      const founder1Campaigns = await factory.getFounderProjects(await founder.getAddress());
+      const founder2Campaigns = await factory.getFounderProjects(await contributor1.getAddress());
       
       expect(founder1Campaigns.length).to.equal(1);
       expect(founder2Campaigns.length).to.equal(1);
