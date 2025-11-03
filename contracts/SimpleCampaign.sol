@@ -5,24 +5,24 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
- * @title SimpleCampaign
- * @notice Simplified milestone-based crowdfunding campaign
+ * @title SimpleProject
+ * @notice Simplified milestone-based crowdfunding project
  * @dev Core features: funding, milestones, and fund release
  */
-contract SimpleCampaign is Ownable, ReentrancyGuard {
+contract SimpleProject is Ownable, ReentrancyGuard {
     
     // Enums
-    enum CampaignState { Funding, Development, Completed, Failed }
+    enum ProjectState { Funding, Development, Completed, Failed }
     enum MilestoneState { Pending, Submitted, Completed }
     
     // Structs
-    struct CampaignData {
+    struct ProjectData {
         string title;
         string description;
         address founder;
         uint256 fundingGoal;
         uint256 totalRaised;
-        CampaignState state;
+        ProjectState state;
         uint256 createdAt;
     }
     
@@ -30,42 +30,61 @@ contract SimpleCampaign is Ownable, ReentrancyGuard {
         string description;
         uint256 releasePercentage; // % of total raised (in basis points)
         MilestoneState state;
+        uint256 submittedAt; // Timestamp when milestone was submitted
+        uint256 votingDeadline; // Deadline for voting (7 days after submission)
+        uint256 yesVotes; // Total contribution amount that voted YES
+        uint256 noVotes; // Total contribution amount that voted NO
     }
     
     // State variables
-    CampaignData public campaignData;
+    ProjectData public projectData;
     Milestone[3] public milestones; // Simplified to 3 milestones
     uint256 public currentMilestone;
     
     // Mappings
     mapping(address => uint256) public contributions;
     address[] public contributors;
+    mapping(uint256 => mapping(address => bool)) public hasVoted; // milestoneId => contributor => hasVoted
+    mapping(uint256 => mapping(address => bool)) public voteChoice; // milestoneId => contributor => voteYes
+    
+    // Constants
+    uint256 public constant VOTING_PERIOD = 7 days;
+    uint256 public constant APPROVAL_THRESHOLD = 50; // 50% of contributions must vote YES
     
     // Events
     event FundReceived(address indexed contributor, uint256 amount);
     event FundingCompleted();
     event DevelopmentStarted();
-    event MilestoneSubmitted(uint256 indexed milestoneId);
+    event MilestoneSubmitted(uint256 indexed milestoneId, uint256 votingDeadline);
+    event VoteCast(uint256 indexed milestoneId, address indexed voter, bool voteYes, uint256 weight);
+    event MilestoneApproved(uint256 indexed milestoneId);
+    event MilestoneRejected(uint256 indexed milestoneId);
     event MilestoneCompleted(uint256 indexed milestoneId, uint256 fundsReleased);
-    event CampaignCompleted();
-    event CampaignFailed();
+    event ProjectCompleted();
+    event ProjectFailed();
     
     // Custom errors
     error InvalidState();
     error InvalidMilestone();
     error MilestoneNotPending();
+    error MilestoneNotSubmitted();
     error OnlyFounder();
+    error OnlyContributor();
     error FundingGoalNotReached();
     error FundingGoalReached();
     error InsufficientFunds();
+    error VotingNotActive();
+    error VotingStillActive();
+    error AlreadyVoted();
+    error MilestoneNotApproved();
     
     modifier onlyFounder() {
-        if (msg.sender != campaignData.founder) revert OnlyFounder();
+        if (msg.sender != projectData.founder) revert OnlyFounder();
         _;
     }
     
-    modifier inState(CampaignState _state) {
-        if (campaignData.state != _state) revert InvalidState();
+    modifier inState(ProjectState _state) {
+        if (projectData.state != _state) revert InvalidState();
         _;
     }
     
@@ -77,13 +96,13 @@ contract SimpleCampaign is Ownable, ReentrancyGuard {
         string[3] memory _milestoneDescriptions,
         uint256[3] memory _milestonePercentages
     ) Ownable(_founder) {
-        campaignData = CampaignData({
+        projectData = ProjectData({
             title: _title,
             description: _description,
             founder: _founder,
             fundingGoal: _fundingGoal,
             totalRaised: 0,
-            state: CampaignState.Funding,
+            state: ProjectState.Funding,
             createdAt: block.timestamp
         });
         
@@ -92,19 +111,23 @@ contract SimpleCampaign is Ownable, ReentrancyGuard {
             milestones[i] = Milestone({
                 description: _milestoneDescriptions[i],
                 releasePercentage: _milestonePercentages[i],
-                state: MilestoneState.Pending
+                state: MilestoneState.Pending,
+                submittedAt: 0,
+                votingDeadline: 0,
+                yesVotes: 0,
+                noVotes: 0
             });
         }
     }
     
     /**
-     * @notice Fund the campaign (only during Funding stage)
+     * @notice Fund the project (only during Funding stage)
      */
-    function fund() external payable nonReentrant inState(CampaignState.Funding) {
+    function fund() external payable nonReentrant inState(ProjectState.Funding) {
         require(msg.value > 0, "Must send ETH");
         
         // Check if funding goal would be exceeded
-        if (campaignData.totalRaised + msg.value > campaignData.fundingGoal) {
+        if (projectData.totalRaised + msg.value > projectData.fundingGoal) {
             revert FundingGoalReached();
         }
         
@@ -114,13 +137,13 @@ contract SimpleCampaign is Ownable, ReentrancyGuard {
         }
         
         contributions[msg.sender] += msg.value;
-        campaignData.totalRaised += msg.value;
+        projectData.totalRaised += msg.value;
         
         emit FundReceived(msg.sender, msg.value);
         
         // Auto-transition to Development if funding goal reached
-        if (campaignData.totalRaised >= campaignData.fundingGoal) {
-            campaignData.state = CampaignState.Development;
+        if (projectData.totalRaised >= projectData.fundingGoal) {
+            projectData.state = ProjectState.Development;
             emit FundingCompleted();
             emit DevelopmentStarted();
         }
@@ -129,49 +152,111 @@ contract SimpleCampaign is Ownable, ReentrancyGuard {
     /**
      * @notice Start development phase (founder only, when funding goal is reached)
      */
-    function startDevelopment() external onlyFounder inState(CampaignState.Funding) {
-        if (campaignData.totalRaised < campaignData.fundingGoal) {
+    function startDevelopment() external onlyFounder inState(ProjectState.Funding) {
+        if (projectData.totalRaised < projectData.fundingGoal) {
             revert FundingGoalNotReached();
         }
         
-        campaignData.state = CampaignState.Development;
+        projectData.state = ProjectState.Development;
         emit FundingCompleted();
         emit DevelopmentStarted();
     }
     
     /**
      * @notice Submit a milestone for review (founder only)
+     * @dev Starts a 7-day voting period for investors to validate the submission
      */
-    function submitMilestone(uint256 milestoneId) external onlyFounder inState(CampaignState.Development) {
+    function submitMilestone(uint256 milestoneId) external onlyFounder inState(ProjectState.Development) {
         if (milestoneId != currentMilestone) revert InvalidMilestone();
         if (milestones[milestoneId].state != MilestoneState.Pending) revert MilestoneNotPending();
         
-        // Mark milestone as submitted
+        // Mark milestone as submitted and set voting deadline
         milestones[milestoneId].state = MilestoneState.Submitted;
-        emit MilestoneSubmitted(milestoneId);
+        milestones[milestoneId].submittedAt = block.timestamp;
+        milestones[milestoneId].votingDeadline = block.timestamp + VOTING_PERIOD;
+        
+        emit MilestoneSubmitted(milestoneId, milestones[milestoneId].votingDeadline);
     }
     
     /**
-     * @notice Complete a milestone (founder only, after submission)
-     * @dev For now, founder can complete directly. In production, this would require voting/approval
+     * @notice Vote on a submitted milestone (contributors only)
+     * @param milestoneId The milestone to vote on
+     * @param voteYes True for YES, false for NO
+     * @dev Each contributor's vote is weighted by their contribution amount
      */
-    function completeMilestone(uint256 milestoneId) external onlyFounder inState(CampaignState.Development) {
-        if (milestoneId != currentMilestone) revert InvalidMilestone();
+    function vote(uint256 milestoneId, bool voteYes) external inState(ProjectState.Development) {
+        // Only contributors can vote
+        if (contributions[msg.sender] == 0) revert OnlyContributor();
         
-        // Milestone must be either Submitted or Pending (allowing direct completion for simplified flow)
-        if (milestones[milestoneId].state != MilestoneState.Submitted && 
-            milestones[milestoneId].state != MilestoneState.Pending) {
-            revert MilestoneNotPending();
+        // Milestone must be in Submitted state
+        if (milestones[milestoneId].state != MilestoneState.Submitted) revert MilestoneNotSubmitted();
+        
+        // Voting must be active
+        if (block.timestamp > milestones[milestoneId].votingDeadline) revert VotingNotActive();
+        
+        // Can only vote once
+        if (hasVoted[milestoneId][msg.sender]) revert AlreadyVoted();
+        
+        // Record the vote
+        hasVoted[milestoneId][msg.sender] = true;
+        voteChoice[milestoneId][msg.sender] = voteYes;
+        
+        // Add vote weight based on contribution
+        uint256 voteWeight = contributions[msg.sender];
+        if (voteYes) {
+            milestones[milestoneId].yesVotes += voteWeight;
+        } else {
+            milestones[milestoneId].noVotes += voteWeight;
         }
         
+        emit VoteCast(milestoneId, msg.sender, voteYes, voteWeight);
+        
+        // Check if voting passed early (more than 50% YES votes)
+        if (milestones[milestoneId].yesVotes * 100 > projectData.totalRaised * APPROVAL_THRESHOLD) {
+            emit MilestoneApproved(milestoneId);
+        }
+    }
+    
+    /**
+     * @notice Finalize voting and complete milestone if approved (founder only)
+     * @param milestoneId The milestone to finalize
+     * @dev Can only be called after voting deadline. Requires majority approval.
+     */
+    function finalizeVoting(uint256 milestoneId) external onlyFounder inState(ProjectState.Development) {
+        if (milestoneId != currentMilestone) revert InvalidMilestone();
+        if (milestones[milestoneId].state != MilestoneState.Submitted) revert MilestoneNotSubmitted();
+        
+        // Voting period must be over
+        if (block.timestamp <= milestones[milestoneId].votingDeadline) revert VotingStillActive();
+        
+        uint256 totalVotes = milestones[milestoneId].yesVotes + milestones[milestoneId].noVotes;
+        uint256 yesPercentage = totalVotes > 0 ? (milestones[milestoneId].yesVotes * 100) / totalVotes : 0;
+        
+        // Check if milestone is approved (>50% YES votes)
+        if (yesPercentage > APPROVAL_THRESHOLD) {
+            _completeMilestone(milestoneId);
+            emit MilestoneApproved(milestoneId);
+        } else {
+            // Milestone rejected - reset to Pending for resubmission
+            milestones[milestoneId].state = MilestoneState.Pending;
+            milestones[milestoneId].yesVotes = 0;
+            milestones[milestoneId].noVotes = 0;
+            emit MilestoneRejected(milestoneId);
+        }
+    }
+    
+    /**
+     * @notice Internal function to complete a milestone and release funds
+     */
+    function _completeMilestone(uint256 milestoneId) internal {
         // Mark milestone as completed
         milestones[milestoneId].state = MilestoneState.Completed;
         
         // Calculate and release funds
-        uint256 releaseAmount = (campaignData.totalRaised * milestones[milestoneId].releasePercentage) / 10000;
+        uint256 releaseAmount = (projectData.totalRaised * milestones[milestoneId].releasePercentage) / 10000;
         
         if (releaseAmount > 0) {
-            (bool success, ) = payable(campaignData.founder).call{value: releaseAmount}("");
+            (bool success, ) = payable(projectData.founder).call{value: releaseAmount}("");
             require(success, "Fund transfer failed");
             
             emit MilestoneCompleted(milestoneId, releaseAmount);
@@ -182,29 +267,29 @@ contract SimpleCampaign is Ownable, ReentrancyGuard {
         
         // Check if all milestones completed
         if (currentMilestone >= 3) {
-            campaignData.state = CampaignState.Completed;
-            emit CampaignCompleted();
+            projectData.state = ProjectState.Completed;
+            emit ProjectCompleted();
         }
     }
     
     /**
-     * @notice Fail the campaign and allow refunds
+     * @notice Fail the project and allow refunds
      * @dev Can be called during Funding or Development phase
      */
-    function failCampaign() external onlyFounder {
-        if (campaignData.state == CampaignState.Completed || campaignData.state == CampaignState.Failed) {
+    function failProject() external onlyFounder {
+        if (projectData.state == ProjectState.Completed || projectData.state == ProjectState.Failed) {
             revert InvalidState();
         }
         
-        campaignData.state = CampaignState.Failed;
-        emit CampaignFailed();
+        projectData.state = ProjectState.Failed;
+        emit ProjectFailed();
     }
     
     /**
-     * @notice Claim refund (contributors only, when campaign failed)
+     * @notice Claim refund (contributors only, when project failed)
      */
     function claimRefund() external nonReentrant {
-        require(campaignData.state == CampaignState.Failed, "Campaign not failed");
+        require(projectData.state == ProjectState.Failed, "Project not failed");
         require(contributions[msg.sender] > 0, "No contribution to refund");
         
         // Calculate refund based on unreleased funds
@@ -228,8 +313,8 @@ contract SimpleCampaign is Ownable, ReentrancyGuard {
     }
     
     // View functions
-    function getCampaignData() external view returns (CampaignData memory) {
-        return campaignData;
+    function getProjectData() external view returns (ProjectData memory) {
+        return projectData;
     }
     
     function getMilestone(uint256 milestoneId) external view returns (Milestone memory) {
@@ -242,5 +327,32 @@ contract SimpleCampaign is Ownable, ReentrancyGuard {
     
     function getContribution(address contributor) external view returns (uint256) {
         return contributions[contributor];
+    }
+    
+    /**
+     * @notice Check if a contributor has voted on a milestone
+     */
+    function getHasVoted(uint256 milestoneId, address contributor) external view returns (bool) {
+        return hasVoted[milestoneId][contributor];
+    }
+    
+    /**
+     * @notice Get voting stats for a milestone
+     */
+    function getVotingStats(uint256 milestoneId) external view returns (
+        uint256 yesVotes,
+        uint256 noVotes,
+        uint256 totalVotes,
+        uint256 yesPercentage,
+        uint256 votingDeadline,
+        bool isActive
+    ) {
+        Milestone memory milestone = milestones[milestoneId];
+        yesVotes = milestone.yesVotes;
+        noVotes = milestone.noVotes;
+        totalVotes = yesVotes + noVotes;
+        yesPercentage = totalVotes > 0 ? (yesVotes * 100) / totalVotes : 0;
+        votingDeadline = milestone.votingDeadline;
+        isActive = milestone.state == MilestoneState.Submitted && block.timestamp <= milestone.votingDeadline;
     }
 }

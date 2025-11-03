@@ -18,10 +18,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Ownable__factory>;
     getContractFactory(
-      name: "Pausable",
-      signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.Pausable__factory>;
-    getContractFactory(
       name: "ReentrancyGuard",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ReentrancyGuard__factory>;
@@ -29,6 +25,10 @@ declare module "hardhat/types/runtime" {
       name: "SimpleCampaign",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SimpleCampaign__factory>;
+    getContractFactory(
+      name: "SimpleProject",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SimpleProject__factory>;
     getContractFactory(
       name: "SimpleFactory",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -40,11 +40,6 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Ownable>;
     getContractAt(
-      name: "Pausable",
-      address: string | ethers.Addressable,
-      signer?: ethers.Signer
-    ): Promise<Contracts.Pausable>;
-    getContractAt(
       name: "ReentrancyGuard",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -54,6 +49,11 @@ declare module "hardhat/types/runtime" {
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.SimpleCampaign>;
+    getContractAt(
+      name: "SimpleProject",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SimpleProject>;
     getContractAt(
       name: "SimpleFactory",
       address: string | ethers.Addressable,
@@ -65,10 +65,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Ownable>;
     deployContract(
-      name: "Pausable",
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Pausable>;
-    deployContract(
       name: "ReentrancyGuard",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ReentrancyGuard>;
@@ -76,6 +72,10 @@ declare module "hardhat/types/runtime" {
       name: "SimpleCampaign",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SimpleCampaign>;
+    deployContract(
+      name: "SimpleProject",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SimpleProject>;
     deployContract(
       name: "SimpleFactory",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -87,11 +87,6 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Ownable>;
     deployContract(
-      name: "Pausable",
-      args: any[],
-      signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.Pausable>;
-    deployContract(
       name: "ReentrancyGuard",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -101,6 +96,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SimpleCampaign>;
+    deployContract(
+      name: "SimpleProject",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SimpleProject>;
     deployContract(
       name: "SimpleFactory",
       args: any[],

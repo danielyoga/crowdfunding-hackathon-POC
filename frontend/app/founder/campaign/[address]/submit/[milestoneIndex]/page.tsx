@@ -39,6 +39,7 @@ export default function SubmitMilestonePage() {
   const campaignAddress = params.address as string;
   const milestoneIndex = parseInt(params.milestoneIndex as string);
 
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [campaignData, setCampaignData] = useState<any>(null);
@@ -48,6 +49,11 @@ export default function SubmitMilestonePage() {
   const [ipfsHash, setIpfsHash] = useState("");
   const [description, setDescription] = useState("");
   const [fileUploading, setFileUploading] = useState(false);
+
+  // Set mounted state to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Role-based access control - only founders can access this page
   useEffect(() => {
@@ -63,32 +69,96 @@ export default function SubmitMilestonePage() {
   }, [isConnected, account, campaignAddress, milestoneIndex]);
 
   async function fetchData() {
-    if (!signer) return;
-
     try {
       setLoading(true);
 
-      // Validate and normalize the address to prevent ENS resolution
-      const validatedAddress = ethers.getAddress(campaignAddress);
-      const campaign = new ethers.Contract(validatedAddress, SIMPLE_CAMPAIGN_ABI, signer);
+      if (isInMockMode) {
+        // Mock mode - load from localStorage
+        const storedCampaigns = localStorage.getItem('mockCampaigns');
+        if (!storedCampaigns) {
+          toast.error("No campaigns found");
+          setLoading(false);
+          return;
+        }
 
-      // Fetch campaign and milestone data
-      const data = await campaign.getCampaignData();
-      const milestone = await campaign.getMilestone(milestoneIndex);
-      const currentMilestone = Number(await campaign.currentMilestone());
+        const campaigns = JSON.parse(storedCampaigns);
+        const foundCampaign = campaigns.find((c: any) => c.address === campaignAddress);
+        
+        if (!foundCampaign) {
+          toast.error("Campaign not found");
+          setLoading(false);
+          return;
+        }
 
-      // Verify founder
-      if (data.founder.toLowerCase() !== account?.toLowerCase()) {
-        throw new Error("Only the campaign founder can submit milestones");
+        // Verify founder
+        if (foundCampaign.founder.toLowerCase() !== account?.toLowerCase()) {
+          toast.error("Only the campaign founder can submit milestones");
+          setLoading(false);
+          return;
+        }
+
+        // Verify milestone index
+        if (milestoneIndex !== foundCampaign.currentMilestone) {
+          toast.error("Can only submit the current milestone");
+          setLoading(false);
+          return;
+        }
+
+        // Create mock campaign data
+        setCampaignData({
+          title: foundCampaign.title,
+          description: foundCampaign.description,
+          founder: foundCampaign.founder,
+          fundingGoal: ethers.parseEther(foundCampaign.fundingGoal),
+          totalRaised: ethers.parseEther(foundCampaign.totalRaised),
+          totalCommitted: ethers.parseEther(foundCampaign.totalRaised),
+          state: foundCampaign.state,
+          createdAt: Math.floor(new Date(foundCampaign.createdAt).getTime() / 1000),
+        });
+
+        // Create mock milestone data (SimpleCampaign has 3 milestones with equal distribution)
+        const releasePercentages = [3333, 3333, 3334]; // 33.33%, 33.33%, 33.34% in basis points
+        setMilestoneData({
+          description: `Milestone ${milestoneIndex}`,
+          releasePercentage: releasePercentages[milestoneIndex],
+          state: foundCampaign.milestones && foundCampaign.milestones[milestoneIndex] 
+            ? foundCampaign.milestones[milestoneIndex].state 
+            : 0,
+          submittedAt: 0,
+          votingDeadline: 0,
+          yesVotes: 0,
+          noVotes: 0,
+        });
+
+      } else {
+        // Real Web3 mode
+        if (!signer) {
+          setLoading(false);
+          return;
+        }
+
+        // Validate and normalize the address to prevent ENS resolution
+        const validatedAddress = ethers.getAddress(campaignAddress);
+        const campaign = new ethers.Contract(validatedAddress, SIMPLE_CAMPAIGN_ABI, signer);
+
+        // Fetch campaign and milestone data
+        const data = await campaign.getCampaignData();
+        const milestone = await campaign.getMilestone(milestoneIndex);
+        const currentMilestone = Number(await campaign.currentMilestone());
+
+        // Verify founder
+        if (data.founder.toLowerCase() !== account?.toLowerCase()) {
+          throw new Error("Only the campaign founder can submit milestones");
+        }
+
+        // Verify milestone index
+        if (milestoneIndex !== currentMilestone) {
+          throw new Error("Can only submit the current milestone");
+        }
+
+        setCampaignData(data);
+        setMilestoneData(milestone);
       }
-
-      // Verify milestone index
-      if (milestoneIndex !== currentMilestone) {
-        throw new Error("Can only submit the current milestone");
-      }
-
-      setCampaignData(data);
-      setMilestoneData(milestone);
 
     } catch (err: any) {
       console.error("Error fetching data:", err);
@@ -99,7 +169,7 @@ export default function SubmitMilestonePage() {
   }
 
   const handleSubmit = async () => {
-    if (!signer || !campaignData || !milestoneData) return;
+    if (!campaignData || !milestoneData) return;
 
     // Validation
     if (!ipfsHash || ipfsHash.trim() === "") {
@@ -114,21 +184,72 @@ export default function SubmitMilestonePage() {
 
     try {
       setSubmitting(true);
-      toast.info("Please confirm the transaction in your wallet...");
 
-      // Validate and normalize the address to prevent ENS resolution
-      const validatedAddress = ethers.getAddress(campaignAddress);
-      const campaign = new ethers.Contract(validatedAddress, SIMPLE_CAMPAIGN_ABI, signer);
+      if (isInMockMode) {
+        // Mock mode - update milestone in localStorage
+        toast.info("Submitting milestone for voting...");
+        
+        // Simulate async operation
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const storedCampaigns = localStorage.getItem('mockCampaigns');
+        if (storedCampaigns) {
+          const campaigns = JSON.parse(storedCampaigns);
+          const campaignIndex = campaigns.findIndex((c: any) => c.address === campaignAddress);
+          
+          if (campaignIndex !== -1) {
+            // Initialize milestones array if not exists
+            if (!campaigns[campaignIndex].milestones) {
+              campaigns[campaignIndex].milestones = [{}, {}, {}];
+            }
+            
+            // Set milestone as submitted with voting deadline (7 days from now)
+            const now = Math.floor(Date.now() / 1000);
+            campaigns[campaignIndex].milestones[milestoneIndex] = {
+              state: 1, // MilestoneState.Submitted
+              submittedAt: now,
+              votingDeadline: now + (7 * 24 * 60 * 60), // 7 days
+              yesVotes: 0,
+              noVotes: 0,
+              voters: [],
+              ipfsHash: ipfsHash.trim(),
+              submissionDescription: description.trim(),
+            };
+            
+            localStorage.setItem('mockCampaigns', JSON.stringify(campaigns));
+            
+            toast.success("Milestone submitted successfully! 🎉 Voting period has started (7 days).");
+            
+            // Redirect to campaign management page
+            router.push(`/founder/campaign/${campaignAddress}`);
+          }
+        }
+        
+      } else {
+        // Real Web3 mode
+        if (!signer) {
+          toast.error("Wallet not connected");
+          return;
+        }
 
-      const tx = await campaign.submitMilestone(milestoneIndex, ipfsHash.trim(), description.trim());
+        toast.info("Please confirm the transaction in your wallet...");
 
-      toast.info("Transaction submitted. Submitting milestone...");
-      await tx.wait();
+        // Validate and normalize the address to prevent ENS resolution
+        const validatedAddress = ethers.getAddress(campaignAddress);
+        const campaign = new ethers.Contract(validatedAddress, SIMPLE_CAMPAIGN_ABI, signer);
 
-      toast.success("Milestone submitted successfully! 🎉 Voting period has started.");
+        // SimpleCampaign.submitMilestone() only takes milestoneId
+        // Store IPFS hash and description separately (e.g., in an event or off-chain)
+        const tx = await campaign.submitMilestone(milestoneIndex);
 
-      // Redirect to campaign management page
-      router.push(`/founder/campaign/${campaignAddress}`);
+        toast.info("Transaction submitted. Submitting milestone...");
+        await tx.wait();
+
+        toast.success("Milestone submitted successfully! 🎉 Voting period has started.");
+
+        // Redirect to campaign management page
+        router.push(`/founder/campaign/${campaignAddress}`);
+      }
 
     } catch (err: any) {
       console.error("Error submitting milestone:", err);
@@ -170,6 +291,19 @@ export default function SubmitMilestonePage() {
       setFileUploading(false);
     }
   };
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <>
+        <Header />
+        <main className="relative min-h-screen">
+          <LoadingState message="Loading..." />
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   if (!isConnected) {
     return (
@@ -214,10 +348,7 @@ export default function SubmitMilestonePage() {
     );
   }
 
-  const releaseAmount = (Number(campaignData.totalCommitted) * milestoneData.releasePercentage) / 100;
-  const deadline = Number(milestoneData.deadline);
-  const isBeforeDeadline = Date.now() / 1000 < deadline;
-  const daysRemaining = Math.max(0, Math.floor((deadline - Date.now() / 1000) / (24 * 60 * 60)));
+  const releaseAmount = ((Number(campaignData.totalCommitted) * milestoneData.releasePercentage) / 10000).toString();
 
   return (
     <>
@@ -249,34 +380,42 @@ export default function SubmitMilestonePage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Form */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Deadline Warning */}
-              {!isBeforeDeadline && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Deadline has passed! Submitting late may result in campaign failure.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {isBeforeDeadline && daysRemaining <= 7 && (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Only {daysRemaining} days remaining until deadline!
-                  </AlertDescription>
-                </Alert>
-              )}
+              {/* Important Information */}
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  <p className="font-semibold mb-1">Submission Guidelines</p>
+                  <p className="text-sm">
+                    Submit proof of your work (IPFS hash) and a detailed description. 
+                    Once submitted, investors will have 7 days to vote on your milestone.
+                  </p>
+                </AlertDescription>
+              </Alert>
 
               {/* Upload Form */}
               <Card>
                 <CardHeader>
                   <CardTitle>Evidence Upload</CardTitle>
                   <CardDescription>
-                    Upload your milestone deliverables to IPFS
+                    Upload your milestone deliverables to IPFS for permanent, decentralized storage
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {/* Examples of what to submit */}
+                  <Alert>
+                    <Upload className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      <p className="font-semibold mb-1">Examples of Evidence:</p>
+                      <ul className="space-y-0.5 list-disc list-inside">
+                        <li>Screenshots or demo videos of your work</li>
+                        <li>Source code (ZIP file) or GitHub repository link</li>
+                        <li>Documentation (PDF, Markdown)</li>
+                        <li>Design files or prototypes</li>
+                        <li>Test results or performance metrics</li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+
                   {/* File Upload */}
                   <div className="space-y-3">
                     <Label>Upload File to IPFS</Label>
@@ -310,6 +449,9 @@ export default function SubmitMilestonePage() {
                         )}
                       </label>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      💡 Tip: Compress multiple files into a ZIP to keep everything organized
+                    </p>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -360,23 +502,38 @@ export default function SubmitMilestonePage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Helpful tips */}
+                  <Alert>
+                    <CheckCircle className="h-4 w-4" />
+                    <AlertDescription className="text-xs">
+                      <p className="font-semibold mb-1">What to include:</p>
+                      <ul className="space-y-0.5 list-disc list-inside">
+                        <li>Summary of completed work</li>
+                        <li>Key features or deliverables</li>
+                        <li>How to access/verify your work</li>
+                        <li>Any challenges overcome</li>
+                        <li>Next steps (if applicable)</li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+
                   <div className="space-y-2">
                     <Label htmlFor="description">
                       Description <span className="text-red-500">*</span>
                     </Label>
                     <Textarea
                       id="description"
-                      placeholder="Describe what was completed, key features delivered, and any additional notes for voters..."
+                      placeholder="Example: I have successfully completed the initial prototype development. The key features include user authentication, database integration, and responsive UI. You can verify the work by accessing the IPFS link above. The prototype is fully functional and ready for testing. Next milestone will focus on adding advanced features and optimizations."
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      rows={8}
+                      rows={10}
                       maxLength={500}
                     />
                     <div className="flex justify-between text-xs">
                       <span className="text-muted-foreground">
                         Minimum 10 characters
                       </span>
-                      <span className="text-muted-foreground">
+                      <span className={`${description.length >= 500 ? "text-red-500" : "text-muted-foreground"}`}>
                         {description.length}/500
                       </span>
                     </div>
@@ -388,6 +545,9 @@ export default function SubmitMilestonePage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Submission Checklist</CardTitle>
+                  <CardDescription>
+                    Make sure you complete all requirements before submitting
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
@@ -402,22 +562,22 @@ export default function SubmitMilestonePage() {
                       <CheckCircle className={`w-5 h-5 flex-shrink-0 ${ipfsHash ? "text-green-500" : "text-muted-foreground"}`} />
                       <div>
                         <p className="text-sm font-medium">IPFS link is working and accessible</p>
-                        <p className="text-xs text-muted-foreground">Click "Test IPFS Link" to verify</p>
+                        <p className="text-xs text-muted-foreground">Click "Test IPFS Link" above to verify</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
                       <CheckCircle className={`w-5 h-5 flex-shrink-0 ${description.length >= 10 ? "text-green-500" : "text-muted-foreground"}`} />
                       <div>
-                        <p className="text-sm font-medium">Description provided</p>
-                        <p className="text-xs text-muted-foreground">Explain what was delivered</p>
+                        <p className="text-sm font-medium">Detailed description provided</p>
+                        <p className="text-xs text-muted-foreground">Minimum 10 characters explaining your work</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
-                      <CheckCircle className={`w-5 h-5 flex-shrink-0 ${isBeforeDeadline ? "text-green-500" : "text-red-500"}`} />
+                      <CheckCircle className={`w-5 h-5 flex-shrink-0 ${(ipfsHash && description.length >= 10) ? "text-green-500" : "text-muted-foreground"}`} />
                       <div>
-                        <p className="text-sm font-medium">Before deadline</p>
+                        <p className="text-sm font-medium">Ready for community voting</p>
                         <p className="text-xs text-muted-foreground">
-                          {isBeforeDeadline ? `${daysRemaining} days remaining` : "Deadline exceeded"}
+                          All requirements met for submission
                         </p>
                       </div>
                     </div>
@@ -465,7 +625,7 @@ export default function SubmitMilestonePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Description</p>
+                    <p className="text-sm text-muted-foreground mb-1">Milestone</p>
                     <p className="text-sm font-medium">{milestoneData.description}</p>
                   </div>
 
@@ -474,21 +634,19 @@ export default function SubmitMilestonePage() {
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Release %</span>
-                      <span className="font-medium">{milestoneData.releasePercentage}%</span>
+                      <span className="font-medium">{(milestoneData.releasePercentage / 100).toFixed(2)}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Potential Release</span>
                       <span className="font-medium">{formatEth(releaseAmount)} ETH</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Deadline</span>
-                      <span className="font-medium">{formatDate(deadline)}</span>
+                      <span className="text-muted-foreground">Voting Period</span>
+                      <span className="font-medium">7 days</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Days Remaining</span>
-                      <span className={`font-medium ${daysRemaining <= 7 ? "text-orange-500" : ""}`}>
-                        {isBeforeDeadline ? daysRemaining : 0} days
-                      </span>
+                      <span className="text-muted-foreground">Approval Threshold</span>
+                      <span className="font-medium">&gt;50% YES</span>
                     </div>
                   </div>
                 </CardContent>
@@ -517,7 +675,13 @@ export default function SubmitMilestonePage() {
               <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription className="text-xs">
-                  After submission, contributors will have 7 days to vote. You need at least 60% YES votes to approve this milestone.
+                  <p className="font-semibold mb-1">What happens next?</p>
+                  <ul className="space-y-1 list-disc list-inside">
+                    <li>Contributors have 7 days to vote on your submission</li>
+                    <li>Votes are weighted by contribution amount</li>
+                    <li>Need &gt;50% YES votes to approve</li>
+                    <li>After voting ends, finalize to release funds</li>
+                  </ul>
                 </AlertDescription>
               </Alert>
             </div>

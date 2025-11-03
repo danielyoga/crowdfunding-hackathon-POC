@@ -58,7 +58,7 @@ export default function CampaignDetailsPage() {
   const { role, mockAccount, isInMockMode } = useMockRole();
   const account = mockAccount;
   const isConnected = !!role;
-  const chainId = 84532; // Base Sepolia for mock mode
+  const chainId = 31337; // Localhost for testing, update to 4202 for Lisk Sepolia or 1135 for Lisk Mainnet
   const provider = null; // No provider needed in mock mode
   const signer = null; // No signer needed in mock mode
   
@@ -122,66 +122,37 @@ export default function CampaignDetailsPage() {
           createdAt: BigInt(Math.floor(new Date(foundCampaign.createdAt).getTime() / 1000)),
         };
 
+        // For SimpleCampaign mock mode, create milestones with proper structure
         const mockMilestones: Milestone[] = [
           {
+            description: "Milestone 0",
+            releasePercentage: 3333, // 33.33% in basis points
+            state: foundCampaign.currentMilestone > 0 ? MilestoneState.Completed : 
+                   foundCampaign.milestones && foundCampaign.milestones[0] ? foundCampaign.milestones[0].state : MilestoneState.Pending,
+            submittedAt: foundCampaign.milestones && foundCampaign.milestones[0] ? BigInt(foundCampaign.milestones[0].submittedAt || 0) : BigInt(0),
+            votingDeadline: foundCampaign.milestones && foundCampaign.milestones[0] ? BigInt(foundCampaign.milestones[0].votingDeadline || 0) : BigInt(0),
+            yesVotes: foundCampaign.milestones && foundCampaign.milestones[0] ? BigInt(foundCampaign.milestones[0].yesVotes || 0) : BigInt(0),
+            noVotes: foundCampaign.milestones && foundCampaign.milestones[0] ? BigInt(foundCampaign.milestones[0].noVotes || 0) : BigInt(0),
+          },
+          {
             description: "Milestone 1",
-            releasePercentage: 10,
-            deadline: BigInt(Math.floor(Date.now() / 1000) + 86400 * 30),
-            state: MilestoneState.Pending,
-            ipfsHash: "",
-            submittedAt: BigInt(0),
-            votingDeadline: BigInt(0),
-            yesVotes: BigInt(0),
-            noVotes: BigInt(0),
-            rejectionCount: 0,
+            releasePercentage: 3333, // 33.33% in basis points
+            state: foundCampaign.currentMilestone > 1 ? MilestoneState.Completed : 
+                   foundCampaign.milestones && foundCampaign.milestones[1] ? foundCampaign.milestones[1].state : MilestoneState.Pending,
+            submittedAt: foundCampaign.milestones && foundCampaign.milestones[1] ? BigInt(foundCampaign.milestones[1].submittedAt || 0) : BigInt(0),
+            votingDeadline: foundCampaign.milestones && foundCampaign.milestones[1] ? BigInt(foundCampaign.milestones[1].votingDeadline || 0) : BigInt(0),
+            yesVotes: foundCampaign.milestones && foundCampaign.milestones[1] ? BigInt(foundCampaign.milestones[1].yesVotes || 0) : BigInt(0),
+            noVotes: foundCampaign.milestones && foundCampaign.milestones[1] ? BigInt(foundCampaign.milestones[1].noVotes || 0) : BigInt(0),
           },
           {
             description: "Milestone 2",
-            releasePercentage: 20,
-            deadline: BigInt(Math.floor(Date.now() / 1000) + 86400 * 90),
-            state: MilestoneState.Pending,
-            ipfsHash: "",
-            submittedAt: BigInt(0),
-            votingDeadline: BigInt(0),
-            yesVotes: BigInt(0),
-            noVotes: BigInt(0),
-            rejectionCount: 0,
-          },
-          {
-            description: "Milestone 3",
-            releasePercentage: 25,
-            deadline: BigInt(Math.floor(Date.now() / 1000) + 86400 * 150),
-            state: MilestoneState.Pending,
-            ipfsHash: "",
-            submittedAt: BigInt(0),
-            votingDeadline: BigInt(0),
-            yesVotes: BigInt(0),
-            noVotes: BigInt(0),
-            rejectionCount: 0,
-          },
-          {
-            description: "Milestone 4",
-            releasePercentage: 25,
-            deadline: BigInt(Math.floor(Date.now() / 1000) + 86400 * 240),
-            state: MilestoneState.Pending,
-            ipfsHash: "",
-            submittedAt: BigInt(0),
-            votingDeadline: BigInt(0),
-            yesVotes: BigInt(0),
-            noVotes: BigInt(0),
-            rejectionCount: 0,
-          },
-          {
-            description: "Milestone 5",
-            releasePercentage: 20,
-            deadline: BigInt(Math.floor(Date.now() / 1000) + 86400 * 330),
-            state: MilestoneState.Pending,
-            ipfsHash: "",
-            submittedAt: BigInt(0),
-            votingDeadline: BigInt(0),
-            yesVotes: BigInt(0),
-            noVotes: BigInt(0),
-            rejectionCount: 0,
+            releasePercentage: 3334, // 33.34% in basis points (to make 100%)
+            state: foundCampaign.currentMilestone > 2 ? MilestoneState.Completed : 
+                   foundCampaign.milestones && foundCampaign.milestones[2] ? foundCampaign.milestones[2].state : MilestoneState.Pending,
+            submittedAt: foundCampaign.milestones && foundCampaign.milestones[2] ? BigInt(foundCampaign.milestones[2].submittedAt || 0) : BigInt(0),
+            votingDeadline: foundCampaign.milestones && foundCampaign.milestones[2] ? BigInt(foundCampaign.milestones[2].votingDeadline || 0) : BigInt(0),
+            yesVotes: foundCampaign.milestones && foundCampaign.milestones[2] ? BigInt(foundCampaign.milestones[2].yesVotes || 0) : BigInt(0),
+            noVotes: foundCampaign.milestones && foundCampaign.milestones[2] ? BigInt(foundCampaign.milestones[2].noVotes || 0) : BigInt(0),
           }
         ];
 
@@ -243,7 +214,7 @@ export default function CampaignDetailsPage() {
         );
 
         // Fetch campaign data
-        const data = await campaignContract.getCampaignData();
+        const data = await campaignContract.getProjectData();
         const currentMilestone = Number(await campaignContract.currentMilestone());
         const contributors = await campaignContract.getContributors();
 
@@ -257,14 +228,11 @@ export default function CampaignDetailsPage() {
         const milestones: Milestone[] = milestonesData.map((m, index) => ({
           description: m.description,
           releasePercentage: Number(m.releasePercentage),
-          deadline: m.deadline,
           state: Number(m.state) as MilestoneState,
-          ipfsHash: m.ipfsHash || "",
           submittedAt: m.submittedAt || BigInt(0),
           votingDeadline: m.votingDeadline || BigInt(0),
           yesVotes: m.yesVotes || BigInt(0),
           noVotes: m.noVotes || BigInt(0),
-          rejectionCount: Number(m.rejectionCount) || 0,
         }));
 
         // Get user's contribution if connected
@@ -435,17 +403,67 @@ export default function CampaignDetailsPage() {
       setIsVoting(true);
       
       if (isInMockMode) {
-        // Mock mode - simulate voting
+        // Mock mode - simulate voting and update localStorage
         toast.info("Simulating vote submission...");
         
         // Simulate async operation
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        console.log('Mock voting on milestone:', { 
-          milestoneIndex, 
-          voteYes,
-          campaignAddress 
-        });
+        // Load campaigns from localStorage
+        const storedCampaigns = localStorage.getItem('mockCampaigns');
+        if (storedCampaigns) {
+          const campaigns = JSON.parse(storedCampaigns);
+          const campaignIndex = campaigns.findIndex((c: any) => c.address === campaignAddress);
+          
+          if (campaignIndex !== -1) {
+            // Initialize milestones array if not exists
+            if (!campaigns[campaignIndex].milestones) {
+              campaigns[campaignIndex].milestones = [{}, {}, {}];
+            }
+            
+            // Initialize milestone data if not exists
+            if (!campaigns[campaignIndex].milestones[milestoneIndex]) {
+              campaigns[campaignIndex].milestones[milestoneIndex] = {
+                yesVotes: 0,
+                noVotes: 0,
+                voters: []
+              };
+            }
+            
+            const milestone = campaigns[campaignIndex].milestones[milestoneIndex];
+            
+            // Check if user already voted
+            if (!milestone.voters) milestone.voters = [];
+            if (milestone.voters.includes(account)) {
+              toast.error("You have already voted on this milestone");
+              setIsVoting(false);
+              return;
+            }
+            
+            // Get user's contribution weight
+            const userContribution = parseFloat(campaign.userContribution?.totalAmount.toString() || "0") / 1e18;
+            
+            // Add vote
+            if (voteYes) {
+              milestone.yesVotes = (parseFloat(milestone.yesVotes) || 0) + userContribution;
+            } else {
+              milestone.noVotes = (parseFloat(milestone.noVotes) || 0) + userContribution;
+            }
+            
+            // Mark user as voted
+            milestone.voters.push(account);
+            
+            // Save back to localStorage
+            localStorage.setItem('mockCampaigns', JSON.stringify(campaigns));
+            
+            console.log('Mock voting on milestone:', { 
+              milestoneIndex, 
+              voteYes,
+              campaignAddress,
+              weight: userContribution
+            });
+          }
+        }
         
         toast.success(`Vote ${voteYes ? "YES" : "NO"} recorded! ✅`);
         
@@ -620,7 +638,7 @@ export default function CampaignDetailsPage() {
                     <Card>
                       <CardContent className="pt-6">
                         <div className="text-2xl font-bold">{formatEth(campaign.data.totalRaised)}</div>
-                        <div className="text-sm text-muted-foreground">ETH Raised</div>
+                        <div className="text-sm text-muted-foreground">IDRX Raised</div>
                       </CardContent>
                     </Card>
                     <Card>
@@ -695,7 +713,7 @@ export default function CampaignDetailsPage() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-3xl font-bold">{formatEth(campaign.data.totalRaised)}</span>
-                    <span className="text-muted-foreground">/ {formatEth(campaign.data.fundingGoal)} ETH</span>
+                    <span className="text-muted-foreground">/ {formatEth(campaign.data.fundingGoal)} IDRX</span>
                   </div>
                   
                   <Progress value={Math.min(progress, 100)} className="h-2" />
@@ -715,15 +733,15 @@ export default function CampaignDetailsPage() {
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Total</span>
-                      <span className="font-medium">{formatEth(campaign.userContribution.totalAmount)} ETH</span>
+                      <span className="font-medium">{formatEth(campaign.userContribution.totalAmount)} IDRX</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Committed</span>
-                      <span className="font-medium">{formatEth(campaign.userContribution.committedAmount)} ETH</span>
+                      <span className="font-medium">{formatEth(campaign.userContribution.committedAmount)} IDRX</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Reserve</span>
-                      <span className="font-medium">{formatEth(campaign.userContribution.reserveAmount)} ETH</span>
+                      <span className="font-medium">{formatEth(campaign.userContribution.reserveAmount)} IDRX</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between">
@@ -770,7 +788,7 @@ export default function CampaignDetailsPage() {
                       <>
                         {/* Amount */}
                         <div className="space-y-2">
-                          <Label htmlFor="amount">Amount (ETH)</Label>
+                          <Label htmlFor="amount">Amount (IDRX)</Label>
                           <Input
                             id="amount"
                             type="number"
@@ -781,7 +799,7 @@ export default function CampaignDetailsPage() {
                             onChange={(e) => setFundAmount(e.target.value)}
                           />
                           <p className="text-xs text-muted-foreground">
-                            Minimum: 0.001 ETH
+                            Minimum: 0.001 IDRX
                           </p>
                         </div>
 
@@ -805,7 +823,7 @@ export default function CampaignDetailsPage() {
               )}
 
               {/* Development Phase Info - For investors */}
-              {!isFounder && campaign.data.state === CampaignState.Development && (
+              {!isFounder && campaign.data.state === CampaignState.Development && !hasContributed && (
                 <Card>
                   <CardHeader>
                     <CardTitle>Development Phase</CardTitle>
@@ -824,8 +842,205 @@ export default function CampaignDetailsPage() {
                 </Card>
               )}
 
-              {/* Voting Section - Removed for simplified workflow. 
-                  Will be re-added when voting functionality is implemented */}
+              {/* Voting Section - For investors who have contributed */}
+              {hasContributed && !isFounder && campaign.data.state === CampaignState.Development && (() => {
+                // Find the milestone that's currently in Submitted state
+                const votingMilestone = campaign.milestones.find((m, idx) => 
+                  m.state === MilestoneState.Submitted && idx === campaign.data.currentMilestone
+                );
+                const votingMilestoneIndex = campaign.milestones.findIndex((m, idx) => 
+                  m.state === MilestoneState.Submitted && idx === campaign.data.currentMilestone
+                );
+
+                if (!votingMilestone || votingMilestoneIndex === -1) return null;
+
+                const totalVotes = Number(votingMilestone.yesVotes) + Number(votingMilestone.noVotes);
+                const yesPercentage = totalVotes > 0 ? (Number(votingMilestone.yesVotes) / totalVotes) * 100 : 0;
+                const noPercentage = totalVotes > 0 ? (Number(votingMilestone.noVotes) / totalVotes) * 100 : 0;
+                const votingDeadline = Number(votingMilestone.votingDeadline);
+                const now = Math.floor(Date.now() / 1000);
+                const timeRemaining = votingDeadline - now;
+                const isVotingActive = timeRemaining > 0 && votingMilestone.state === MilestoneState.Submitted;
+                
+                // Check if user has voted (for mock mode, check localStorage)
+                let hasUserVoted = false;
+                if (isInMockMode && account) {
+                  const storedCampaigns = localStorage.getItem('mockCampaigns');
+                  if (storedCampaigns) {
+                    const campaigns = JSON.parse(storedCampaigns);
+                    const foundCampaign = campaigns.find((c: any) => c.address === campaignAddress);
+                    if (foundCampaign && foundCampaign.milestones && foundCampaign.milestones[votingMilestoneIndex]) {
+                      const milestone = foundCampaign.milestones[votingMilestoneIndex];
+                      hasUserVoted = milestone.voters && milestone.voters.includes(account);
+                    }
+                  }
+                }
+
+                return (
+                  <Card id="voting-section" className="border-primary/50">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-primary" />
+                        Milestone Voting Active
+                      </CardTitle>
+                      <CardDescription>
+                        Vote to approve or reject Milestone {votingMilestoneIndex}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Milestone Info */}
+                      <div className="p-4 bg-muted rounded-lg">
+                        <h4 className="font-semibold mb-2">Milestone {votingMilestoneIndex}</h4>
+                        <p className="text-sm text-muted-foreground mb-2">
+                          {votingMilestone.description}
+                        </p>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Target className="w-4 h-4" />
+                          <span>Release: {(votingMilestone.releasePercentage / 100).toFixed(2)}%</span>
+                        </div>
+                      </div>
+
+                      {/* Founder's Submission Details (if available in mock mode) */}
+                      {(() => {
+                        if (isInMockMode) {
+                          const storedCampaigns = localStorage.getItem('mockCampaigns');
+                          if (storedCampaigns) {
+                            const campaigns = JSON.parse(storedCampaigns);
+                            const foundCampaign = campaigns.find((c: any) => c.address === campaignAddress);
+                            if (foundCampaign && foundCampaign.milestones && foundCampaign.milestones[votingMilestoneIndex]) {
+                              const milestone = foundCampaign.milestones[votingMilestoneIndex];
+                              if (milestone.ipfsHash || milestone.submissionDescription) {
+                                return (
+                                  <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg space-y-3">
+                                    <h4 className="font-semibold text-sm flex items-center gap-2">
+                                      <CheckCircle className="w-4 h-4 text-primary" />
+                                      Founder's Submission
+                                    </h4>
+                                    
+                                    {milestone.submissionDescription && (
+                                      <div>
+                                        <p className="text-xs text-muted-foreground mb-1">Description:</p>
+                                        <p className="text-sm">{milestone.submissionDescription}</p>
+                                      </div>
+                                    )}
+                                    
+                                    {milestone.ipfsHash && (
+                                      <div>
+                                        <p className="text-xs text-muted-foreground mb-1">Evidence:</p>
+                                        <a
+                                          href={`https://ipfs.io/ipfs/${milestone.ipfsHash}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-sm text-primary hover:underline flex items-center gap-1"
+                                        >
+                                          View on IPFS <ExternalLink className="w-3 h-3" />
+                                        </a>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              }
+                            }
+                          }
+                        }
+                        return null;
+                      })()}
+
+                      {/* Voting Stats */}
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-green-600 font-medium">YES</span>
+                            <span className="text-green-600 font-medium">{yesPercentage.toFixed(1)}%</span>
+                          </div>
+                          <Progress value={yesPercentage} className="h-2 bg-red-100">
+                            <div className="h-full bg-green-500 transition-all" style={{ width: `${yesPercentage}%` }} />
+                          </Progress>
+                        </div>
+                        
+                        <div>
+                          <div className="flex justify-between text-sm mb-1">
+                            <span className="text-red-600 font-medium">NO</span>
+                            <span className="text-red-600 font-medium">{noPercentage.toFixed(1)}%</span>
+                          </div>
+                          <Progress value={noPercentage} className="h-2 bg-green-100">
+                            <div className="h-full bg-red-500 transition-all" style={{ width: `${noPercentage}%` }} />
+                          </Progress>
+                        </div>
+
+                        <Separator />
+
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Total Votes:</span>
+                          <span className="font-medium">{formatEth(BigInt(totalVotes))} IDRX</span>
+                        </div>
+                        
+                        {isVotingActive && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="w-4 h-4 text-orange-500" />
+                            <span className="text-orange-500 font-medium">
+                              {timeRemaining > 86400 
+                                ? `${Math.floor(timeRemaining / 86400)} days remaining`
+                                : timeRemaining > 3600
+                                ? `${Math.floor(timeRemaining / 3600)} hours remaining`
+                                : `${Math.floor(timeRemaining / 60)} minutes remaining`}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Voting Buttons */}
+                      {!isConnected ? (
+                        <Alert>
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription className="text-xs">
+                            Please select your role (Investor) to vote
+                          </AlertDescription>
+                        </Alert>
+                      ) : hasUserVoted ? (
+                        <Alert>
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <AlertDescription className="text-xs">
+                            You have already voted on this milestone
+                          </AlertDescription>
+                        </Alert>
+                      ) : !isVotingActive ? (
+                        <Alert>
+                          <XCircle className="h-4 w-4" />
+                          <AlertDescription className="text-xs">
+                            Voting period has ended. Waiting for founder to finalize results.
+                          </AlertDescription>
+                        </Alert>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-3">
+                          <Button
+                            onClick={() => handleVote(votingMilestoneIndex, true)}
+                            disabled={isVoting}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            {isVoting ? "Voting..." : "Vote YES"}
+                          </Button>
+                          <Button
+                            onClick={() => handleVote(votingMilestoneIndex, false)}
+                            disabled={isVoting}
+                            variant="destructive"
+                          >
+                            {isVoting ? "Voting..." : "Vote NO"}
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Info about voting */}
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription className="text-xs">
+                          Your vote is weighted by your contribution amount. Milestone requires &gt;50% YES votes to be approved.
+                        </AlertDescription>
+                      </Alert>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
 
               {/* Founder Actions */}
               {isFounder && (

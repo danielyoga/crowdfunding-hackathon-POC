@@ -13,8 +13,8 @@ import { CampaignStateBadge, MilestoneStateBadge } from "@/components/campaign-s
 import { DashboardSkeleton } from "@/components/loading-state";
 import { EmptyState } from "@/components/error-state";
 import { useMockRole } from "@/contexts/MockRoleContext";
-import { getFactoryAddress, SIMPLE_FACTORY_ABI, SIMPLE_CAMPAIGN_ABI, CampaignState, MilestoneState } from "@/lib/contracts";
-import { CampaignCardData } from "@/lib/types";
+import { getFactoryAddress, SIMPLE_FACTORY_ABI, SIMPLE_CAMPAIGN_ABI, ProjectState, MilestoneState } from "@/lib/contracts";
+import { ProjectCardData } from "@/lib/types";
 import { formatEth, formatPercentage, truncateAddress, formatRelativeTime } from "@/lib/web3-utils";
 import { 
   PlusCircle, 
@@ -36,7 +36,7 @@ export default function MyCampaignsPage() {
   const isConnected = !!role;
   const provider: any = null; // No provider needed in mock mode
 
-  const [campaigns, setCampaigns] = useState<CampaignCardData[]>([]);
+  const [projects, setProjects] = useState<ProjectCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     total: 0,
@@ -55,38 +55,38 @@ export default function MyCampaignsPage() {
 
   useEffect(() => {
     if (isConnected && account) {
-      fetchMyCampaigns();
+      fetchMyProjects();
     } else {
       setLoading(false);
     }
   }, [isConnected, account]);
 
-  async function fetchMyCampaigns() {
+  async function fetchMyProjects() {
     try {
       setLoading(true);
 
       if (isInMockMode || !provider) {
-        // Mock mode - load campaigns from localStorage
-        const storedCampaigns = localStorage.getItem('mockCampaigns');
-        const mockCampaigns: CampaignCardData[] = storedCampaigns ? JSON.parse(storedCampaigns) : [];
+        // Mock mode - load projects from localStorage
+        const storedProjects = localStorage.getItem('mockProjects') || localStorage.getItem('mockCampaigns');
+        const mockProjects: ProjectCardData[] = storedProjects ? JSON.parse(storedProjects) : [];
 
         // Parse dates from JSON
-        mockCampaigns.forEach(campaign => {
-          campaign.createdAt = new Date(campaign.createdAt);
+        mockProjects.forEach(project => {
+          project.createdAt = new Date(project.createdAt);
         });
 
         // Calculate stats
-        const activeCampaigns = mockCampaigns.filter(c => 
-          c.state === CampaignState.Funding || c.state === CampaignState.Development
+        const activeProjects = mockProjects.filter(c => 
+          c.state === ProjectState.Funding || c.state === ProjectState.Development
         ).length;
-        const completedCampaigns = mockCampaigns.filter(c => c.state === CampaignState.Completed).length;
-        const totalRaised = mockCampaigns.reduce((sum, c) => sum + parseFloat(c.totalRaised), 0);
+        const completedProjects = mockProjects.filter(c => c.state === ProjectState.Completed).length;
+        const totalRaised = mockProjects.reduce((sum, c) => sum + parseFloat(c.totalRaised), 0);
 
-        setCampaigns(mockCampaigns);
+        setProjects(mockProjects);
         setStats({
-          total: mockCampaigns.length,
-          active: activeCampaigns,
-          completed: completedCampaigns,
+          total: mockProjects.length,
+          active: activeProjects,
+          completed: completedProjects,
           totalRaised: totalRaised.toFixed(4),
           totalReceived: "0.0000",
         });
@@ -97,7 +97,7 @@ export default function MyCampaignsPage() {
       // Real Web3 mode - should not reach here in mock mode
       if (!account) {
         setLoading(false);
-        setCampaigns([]);
+        setProjects([]);
         return;
       }
 
@@ -109,24 +109,24 @@ export default function MyCampaignsPage() {
       const validatedFactoryAddress = ethers.getAddress(factoryAddress);
       const factory = new ethers.Contract(validatedFactoryAddress, SIMPLE_FACTORY_ABI, provider);
 
-      // Get all campaigns
-      const allCampaigns: string[] = await factory.getAllCampaigns();
+      // Get all projects
+      const allProjects: string[] = await factory.getAllProjects();
 
-      // Filter campaigns where connected account is the founder
-      const myCampaignPromises = allCampaigns.map(async (address) => {
+      // Filter projects where connected account is the founder
+      const myProjectPromises = allProjects.map(async (address) => {
         try {
           // Validate and normalize the address to prevent ENS resolution
           const validatedAddress = ethers.getAddress(address);
-          const campaign = new ethers.Contract(validatedAddress, SIMPLE_CAMPAIGN_ABI, provider);
-          const data = await campaign.getCampaignData();
+          const project = new ethers.Contract(validatedAddress, SIMPLE_CAMPAIGN_ABI, provider);
+          const data = await project.getProjectData();
 
           // Only include if this account is the founder
           if (data.founder.toLowerCase() !== account.toLowerCase()) {
             return null;
           }
 
-          const currentMilestone = Number(await campaign.currentMilestone());
-          const contributors = await campaign.getContributors();
+          const currentMilestone = Number(await project.currentMilestone());
+          const contributors = await project.getContributors();
 
           const fundingGoal = formatEth(data.fundingGoal);
           const totalRaised = formatEth(data.totalRaised);
@@ -134,7 +134,7 @@ export default function MyCampaignsPage() {
             ? (Number(data.totalRaised) / Number(data.fundingGoal)) * 100
             : 0;
 
-          const state = Number(data.state) as CampaignState;
+          const state = Number(data.state) as ProjectState;
           const stateLabels = ["Funding", "Development", "Completed", "Failed"];
 
           return {
@@ -148,42 +148,42 @@ export default function MyCampaignsPage() {
             state,
             stateLabel: stateLabels[state],
             currentMilestone,
-            totalMilestones: 5, // SimpleCampaign has 5 milestones
+            totalMilestones: 5, // SimpleProject has 5 milestones
             contributorsCount: contributors.length,
             createdAt: new Date(Number(data.createdAt) * 1000),
           };
         } catch (err) {
-          console.error(`Error fetching campaign ${address}:`, err);
+          console.error(`Error fetching project ${address}:`, err);
           return null;
         }
       });
 
-      const myCampaigns = (await Promise.all(myCampaignPromises)).filter(
-        (c): c is CampaignCardData => c !== null
+      const myProjects = (await Promise.all(myProjectPromises)).filter(
+        (c): c is ProjectCardData => c !== null
       );
 
       // Sort by creation date (newest first)
-      myCampaigns.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      myProjects.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
       // Calculate stats
-      const activeCampaigns = myCampaigns.filter(c => 
-        c.state === CampaignState.Funding || c.state === CampaignState.Development
+      const activeProjects = myProjects.filter(c => 
+        c.state === ProjectState.Funding || c.state === ProjectState.Development
       ).length;
-      const completedCampaigns = myCampaigns.filter(c => c.state === CampaignState.Completed).length;
-      const totalRaised = myCampaigns.reduce((sum, c) => sum + parseFloat(c.totalRaised), 0);
+      const completedProjects = myProjects.filter(c => c.state === ProjectState.Completed).length;
+      const totalRaised = myProjects.reduce((sum, c) => sum + parseFloat(c.totalRaised), 0);
 
-      setCampaigns(myCampaigns);
+      setProjects(myProjects);
       setStats({
-        total: myCampaigns.length,
-        active: activeCampaigns,
-        completed: completedCampaigns,
+        total: myProjects.length,
+        active: activeProjects,
+        completed: completedProjects,
         totalRaised: totalRaised.toFixed(4),
         totalReceived: "0", // TODO: Calculate from milestone releases
       });
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching campaigns:", err);
-      setCampaigns([]);
+      console.error("Error fetching projects:", err);
+      setProjects([]);
       setLoading(false);
     }
   }
@@ -311,8 +311,8 @@ export default function MyCampaignsPage() {
             </Card>
           </div>
 
-          {/* Campaigns List */}
-          {campaigns.length === 0 ? (
+          {/* Projects List */}
+          {projects.length === 0 ? (
             <EmptyState
               title="No projects created"
               message="You haven't created any projects yet. Start your first crowdfunding project today!"
@@ -324,24 +324,24 @@ export default function MyCampaignsPage() {
             />
           ) : (
             <div className="space-y-4">
-              {campaigns.map((campaign) => (
+              {projects.map((project) => (
                 <Card 
-                  key={campaign.address} 
+                  key={project.address} 
                   className="hover:border-primary/50 transition-colors cursor-pointer"
-                  onClick={() => router.push(`/campaign/${campaign.address}`)}
+                  onClick={() => router.push(`/campaign/${project.address}`)}
                 >
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row gap-6">
-                      {/* Campaign Info */}
+                      {/* Project Info */}
                       <div className="flex-1 space-y-4">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-xl font-bold">{campaign.title}</h3>
-                              <CampaignStateBadge state={campaign.state} />
+                              <h3 className="text-xl font-bold">{project.title}</h3>
+                              <CampaignStateBadge state={project.state} />
                             </div>
                             <p className="text-sm text-muted-foreground line-clamp-2">
-                              {campaign.description}
+                              {project.description}
                             </p>
                           </div>
                         </div>
@@ -351,16 +351,16 @@ export default function MyCampaignsPage() {
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">Funding Progress</span>
                             <span className="font-semibold">
-                              {campaign.totalRaised} / {campaign.fundingGoal} ETH
+                              {project.totalRaised} / {project.fundingGoal} IDRX
                             </span>
                           </div>
-                          <Progress value={campaign.progress} className="h-2" />
+                          <Progress value={project.progress} className="h-2" />
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-muted-foreground">
-                              {formatPercentage(campaign.progress)} funded
+                              {formatPercentage(project.progress)} funded
                             </span>
                             <span className="text-muted-foreground">
-                              {campaign.contributorsCount} contributors
+                              {project.contributorsCount} contributors
                             </span>
                           </div>
                         </div>
@@ -369,14 +369,14 @@ export default function MyCampaignsPage() {
                         <div className="flex items-center gap-4 text-sm">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold">
-                              M{campaign.currentMilestone}
+                              M{project.currentMilestone}
                             </div>
                             <span className="text-muted-foreground">
-                              Current Milestone: {campaign.currentMilestone}/{campaign.totalMilestones}
+                              Current Milestone: {project.currentMilestone}/{project.totalMilestones}
                             </span>
                           </div>
                           <div className="text-muted-foreground">
-                            Created {formatRelativeTime(Math.floor(campaign.createdAt.getTime() / 1000))}
+                            Created {formatRelativeTime(Math.floor(project.createdAt.getTime() / 1000))}
                           </div>
                         </div>
                       </div>
@@ -388,20 +388,20 @@ export default function MyCampaignsPage() {
                           className="w-full"
                           asChild
                         >
-                          <Link href={`/founder/campaign/${campaign.address}`}>
+                          <Link href={`/founder/campaign/${project.address}`}>
                             <BarChart3 className="w-4 h-4 mr-2" />
                             Manage
                           </Link>
                         </Button>
 
-                        {campaign.state === CampaignState.Development && (
+                        {project.state === ProjectState.Development && (
                           <Button
                             className="w-full"
                             asChild
                           >
-                            <Link href={`/founder/campaign/${campaign.address}/submit/${campaign.currentMilestone}`}>
+                            <Link href={`/founder/campaign/${project.address}/submit/${project.currentMilestone}`}>
                               <Upload className="w-4 h-4 mr-2" />
-                              Submit M{campaign.currentMilestone}
+                              Submit M{project.currentMilestone}
                             </Link>
                           </Button>
                         )}

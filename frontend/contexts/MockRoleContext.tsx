@@ -69,7 +69,7 @@ export function MockRoleProvider({ children }: { children: React.ReactNode }) {
         setRole: handleSetRole,
         mockAccount,
         mockBalance,
-        isInMockMode: true, // Temporarily re-enabled for testing without MetaMask
+        isInMockMode: false, // Disabled to read from real blockchain
         isClient,
         canChangeRole,
       }}

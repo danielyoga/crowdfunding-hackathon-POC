@@ -1,0 +1,102 @@
+import { ethers } from "hardhat";
+
+async function main() {
+  const [deployer] = await ethers.getSigners();
+  const address = await deployer.getAddress();
+  const balance = await deployer.provider.getBalance(address);
+  
+  console.log("🚀 Lisk Sepolia Deployment Script");
+  console.log("==================================");
+  console.log("Deployment address:", address);
+  console.log("Balance:", ethers.formatEther(balance), "ETH");
+  
+  if (balance === 0n) {
+    console.log("\n❌ No testnet ETH found!");
+    console.log("\n📋 To get testnet ETH:");
+    console.log("1. Import this private key into MetaMask:");
+    console.log("   Private Key: 0x1234567890123456789012345678901234567890123456789012345678901234");
+    console.log("2. Add Lisk Sepolia network to MetaMask:");
+    console.log("   - Network Name: Lisk Sepolia");
+    console.log("   - RPC URL: https://rpc.sepolia-api.lisk.com");
+    console.log("   - Chain ID: 4202");
+    console.log("   - Currency Symbol: ETH");
+    console.log("   - Block Explorer: https://sepolia-blockscout.lisk.com");
+    console.log("3. Get testnet ETH from faucets:");
+    console.log("   - Lisk Sepolia Faucet: https://sepolia-faucet.lisk.com/");
+    console.log("   - Optimism Faucet: https://console.optimism.io/faucet");
+    console.log("\n4. Run this script again after getting testnet ETH");
+    return;
+  }
+  
+  console.log("\n✅ Sufficient balance found! Proceeding with deployment...");
+  
+  // Deploy SimpleFactory
+  console.log("\n📦 Deploying SimpleFactory...");
+  const SimpleFactory = await ethers.getContractFactory("SimpleFactory");
+  const factory = await SimpleFactory.deploy();
+  await factory.waitForDeployment();
+
+  const factoryAddress = await factory.getAddress();
+  console.log("✅ SimpleFactory deployed to:", factoryAddress);
+
+  // Create a sample campaign
+  console.log("\n🎯 Creating sample campaign...");
+  
+  const milestoneDescriptions = [
+    "Lisk Integration Development",
+    "Smart Contract Testing", 
+    "Frontend Integration",
+    "Security Audit",
+    "Mainnet Launch"
+  ];
+  
+  const milestonePercentages = [2000, 2000, 2000, 2000, 2000]; // 20% each
+  
+  const tx = await factory.createCampaign(
+    "Lisk Crowdfunding Platform",
+    "A revolutionary crowdfunding platform built on Lisk L2 for the hackathon",
+    ethers.parseEther("2"), // 2 ETH goal
+    milestoneDescriptions,
+    milestonePercentages,
+    { value: ethers.parseEther("0.01") } // Creation fee
+  );
+  
+  const receipt = await tx.wait();
+  console.log("✅ Sample campaign created!");
+  
+  // Get the campaign address
+  const campaignAddress = await factory.campaigns(0);
+  console.log("✅ Campaign address:", campaignAddress);
+  
+  console.log("\n🎉 Deployment completed successfully!");
+  console.log("=====================================");
+  console.log("Factory Address:", factoryAddress);
+  console.log("Sample Campaign Address:", campaignAddress);
+  console.log("Network: Lisk Sepolia (Chain ID: 4202)");
+  console.log("Explorer: https://sepolia-blockscout.lisk.com");
+  
+  // Save deployment info
+  const deploymentInfo = {
+    network: "lisk-sepolia",
+    chainId: 4202,
+    factoryAddress,
+    campaignAddress,
+    deploymentTime: new Date().toISOString(),
+    explorer: "https://sepolia-blockscout.lisk.com"
+  };
+  
+  console.log("\n📄 Deployment Info (JSON):");
+  console.log(JSON.stringify(deploymentInfo, null, 2));
+  
+  console.log("\n🔧 Frontend Configuration:");
+  console.log("Update your frontend .env.local with:");
+  console.log(`NEXT_PUBLIC_SIMPLE_FACTORY_ADDRESS=${factoryAddress}`);
+  console.log("NEXT_PUBLIC_LISK_SEPOLIA_RPC_URL=https://rpc.sepolia-api.lisk.com");
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error("❌ Deployment failed:", error);
+    process.exit(1);
+  });

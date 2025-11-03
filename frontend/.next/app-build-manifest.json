@@ -23,8 +23,8 @@
       "static/chunks/npm.next.js",
       "static/chunks/main-app.js",
       "static/chunks/npm.ethers.js",
-      "static/chunks/npm.radix-ui.js",
       "static/chunks/npm.noble.js",
+      "static/chunks/npm.radix-ui.js",
       "static/chunks/npm.floating-ui.js",
       "static/chunks/npm.tailwind-merge.js",
       "static/chunks/npm.lucide-react.js",
@@ -33,59 +33,13 @@
       "static/chunks/commons.js",
       "static/chunks/app/not-found.js"
     ],
-    "/founder/campaign/[address]/submit/[milestoneIndex]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/npm.next.js",
-      "static/chunks/main-app.js",
-      "static/chunks/npm.ethers.js",
-      "static/chunks/npm.radix-ui.js",
-      "static/chunks/npm.noble.js",
-      "static/chunks/npm.floating-ui.js",
-      "static/chunks/npm.tailwind-merge.js",
-      "static/chunks/npm.lucide-react.js",
-      "static/chunks/npm.tslib.js",
-      "static/chunks/npm.react-remove-scroll.js",
-      "static/chunks/npm.sonner.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/founder/campaign/[address]/submit/[milestoneIndex]/page.js"
-    ],
-    "/my-campaigns/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/npm.next.js",
-      "static/chunks/main-app.js",
-      "static/chunks/npm.ethers.js",
-      "static/chunks/npm.radix-ui.js",
-      "static/chunks/npm.noble.js",
-      "static/chunks/npm.floating-ui.js",
-      "static/chunks/npm.tailwind-merge.js",
-      "static/chunks/npm.lucide-react.js",
-      "static/chunks/npm.tslib.js",
-      "static/chunks/npm.react-remove-scroll.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/my-campaigns/page.js"
-    ],
-    "/founder/campaign/[address]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/npm.next.js",
-      "static/chunks/main-app.js",
-      "static/chunks/npm.ethers.js",
-      "static/chunks/npm.radix-ui.js",
-      "static/chunks/npm.noble.js",
-      "static/chunks/npm.floating-ui.js",
-      "static/chunks/npm.tailwind-merge.js",
-      "static/chunks/npm.lucide-react.js",
-      "static/chunks/npm.tslib.js",
-      "static/chunks/npm.react-remove-scroll.js",
-      "static/chunks/commons.js",
-      "static/chunks/app/founder/campaign/[address]/page.js"
-    ],
     "/page": [
       "static/chunks/webpack.js",
       "static/chunks/npm.next.js",
       "static/chunks/main-app.js",
       "static/chunks/npm.ethers.js",
-      "static/chunks/npm.radix-ui.js",
       "static/chunks/npm.noble.js",
+      "static/chunks/npm.radix-ui.js",
       "static/chunks/npm.floating-ui.js",
       "static/chunks/npm.tailwind-merge.js",
       "static/chunks/npm.lucide-react.js",
@@ -95,36 +49,37 @@
       "static/chunks/commons.js",
       "static/chunks/app/page.js"
     ],
-    "/my-investments/page": [
+    "/create/page": [
       "static/chunks/webpack.js",
       "static/chunks/npm.next.js",
       "static/chunks/main-app.js",
       "static/chunks/npm.ethers.js",
-      "static/chunks/npm.radix-ui.js",
       "static/chunks/npm.noble.js",
+      "static/chunks/npm.radix-ui.js",
       "static/chunks/npm.floating-ui.js",
       "static/chunks/npm.tailwind-merge.js",
       "static/chunks/npm.lucide-react.js",
       "static/chunks/npm.tslib.js",
       "static/chunks/npm.react-remove-scroll.js",
       "static/chunks/npm.adraffy.js",
+      "static/chunks/npm.sonner.js",
       "static/chunks/commons.js",
-      "static/chunks/app/my-investments/page.js"
+      "static/chunks/app/create/page.js"
     ],
-    "/browse/page": [
+    "/my-campaigns/page": [
       "static/chunks/webpack.js",
       "static/chunks/npm.next.js",
       "static/chunks/main-app.js",
       "static/chunks/npm.ethers.js",
-      "static/chunks/npm.radix-ui.js",
       "static/chunks/npm.noble.js",
+      "static/chunks/npm.radix-ui.js",
       "static/chunks/npm.floating-ui.js",
       "static/chunks/npm.tailwind-merge.js",
       "static/chunks/npm.lucide-react.js",
       "static/chunks/npm.tslib.js",
       "static/chunks/npm.react-remove-scroll.js",
       "static/chunks/commons.js",
-      "static/chunks/app/browse/page.js"
+      "static/chunks/app/my-campaigns/page.js"
     ],
     "/_not-found/page": [
       "static/chunks/webpack.js",
@@ -132,6 +87,38 @@
       "static/chunks/main-app.js",
       "static/chunks/commons.js",
       "static/chunks/app/_not-found/page.js"
+    ],
+    "/campaign/[address]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/npm.next.js",
+      "static/chunks/main-app.js",
+      "static/chunks/npm.ethers.js",
+      "static/chunks/npm.noble.js",
+      "static/chunks/npm.radix-ui.js",
+      "static/chunks/npm.floating-ui.js",
+      "static/chunks/npm.tailwind-merge.js",
+      "static/chunks/npm.lucide-react.js",
+      "static/chunks/npm.tslib.js",
+      "static/chunks/npm.react-remove-scroll.js",
+      "static/chunks/npm.adraffy.js",
+      "static/chunks/npm.sonner.js",
+      "static/chunks/commons.js",
+      "static/chunks/app/campaign/[address]/page.js"
+    ],
+    "/browse/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/npm.next.js",
+      "static/chunks/main-app.js",
+      "static/chunks/npm.ethers.js",
+      "static/chunks/npm.noble.js",
+      "static/chunks/npm.radix-ui.js",
+      "static/chunks/npm.floating-ui.js",
+      "static/chunks/npm.tailwind-merge.js",
+      "static/chunks/npm.lucide-react.js",
+      "static/chunks/npm.tslib.js",
+      "static/chunks/npm.react-remove-scroll.js",
+      "static/chunks/commons.js",
+      "static/chunks/app/browse/page.js"
     ]
   }
 }

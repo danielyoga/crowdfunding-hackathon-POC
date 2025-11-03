@@ -47,12 +47,12 @@ export function truncateAddress(address: string, startChars = 6, endChars = 4): 
 }
 
 /**
- * Format ETH amount with proper decimals
+ * Format IDRX amount with proper decimals
  */
 export function formatEth(wei: bigint | string, decimals = 4): string {
   try {
-    const ethAmount = ethers.formatEther(wei);
-    const num = parseFloat(ethAmount);
+    const idrxAmount = ethers.formatEther(wei);
+    const num = parseFloat(idrxAmount);
     return num.toFixed(decimals);
   } catch (error) {
     return "0.0000";
@@ -60,21 +60,21 @@ export function formatEth(wei: bigint | string, decimals = 4): string {
 }
 
 /**
- * Format ETH with unit
+ * Format IDRX with unit
  */
 export function formatEthWithUnit(wei: bigint | string, decimals = 4): string {
-  return `${formatEth(wei, decimals)} ETH`;
+  return `${formatEth(wei, decimals)} IDRX`;
 }
 
 /**
- * Parse ETH input to wei
+ * Parse IDRX input to wei
  */
-export function parseEthInput(ethAmount: string): bigint {
+export function parseEthInput(idrxAmount: string): bigint {
   try {
-    if (!ethAmount || ethAmount.trim() === "") return BigInt(0);
-    return ethers.parseEther(ethAmount);
+    if (!idrxAmount || idrxAmount.trim() === "") return BigInt(0);
+    return ethers.parseEther(idrxAmount);
   } catch (error) {
-    throw new Error("Invalid ETH amount");
+    throw new Error("Invalid IDRX amount");
   }
 }
 
@@ -104,10 +104,10 @@ export function formatUsd(amount: number, decimals = 2): string {
 }
 
 /**
- * Convert ETH to USD (requires price)
+ * Convert IDRX to USD (requires price)
  */
-export function ethToUsd(ethAmount: string, ethPrice: number): number {
-  return parseFloat(ethAmount) * ethPrice;
+export function ethToUsd(idrxAmount: string, idrxPrice: number): number {
+  return parseFloat(idrxAmount) * idrxPrice;
 }
 
 /**
@@ -293,7 +293,7 @@ export function getMilestoneStateColor(state: number): string {
 }
 
 /**
- * Validate ETH amount
+ * Validate IDRX amount
  */
 export function validateEthAmount(amount: string, min?: bigint, max?: bigint): {
   isValid: boolean;
@@ -311,11 +311,11 @@ export function validateEthAmount(amount: string, min?: bigint, max?: bigint): {
     }
 
     if (min && wei < min) {
-      return { isValid: false, error: `Amount must be at least ${formatEth(min)} ETH` };
+      return { isValid: false, error: `Amount must be at least ${formatEth(min)} IDRX` };
     }
 
     if (max && wei > max) {
-      return { isValid: false, error: `Amount cannot exceed ${formatEth(max)} ETH` };
+      return { isValid: false, error: `Amount cannot exceed ${formatEth(max)} IDRX` };
     }
 
     return { isValid: true };
@@ -350,9 +350,9 @@ export function isSameAddress(address1: string, address2: string): boolean {
  */
 export function getExplorerUrl(chainId: number, type: "tx" | "address", value: string): string {
   const explorers: Record<number, string> = {
-    84532: "https://sepolia.basescan.org", // Base Sepolia
-    8453: "https://basescan.org",           // Base Mainnet
-    31337: "http://localhost:8545",         // Localhost (no explorer)
+    4202: "https://sepolia-blockscout.lisk.com",  // Lisk Sepolia
+    1135: "https://blockscout.lisk.com",           // Lisk Mainnet
+    31337: "http://localhost:8545",                // Localhost (no explorer)
   };
 
   const baseUrl = explorers[chainId];

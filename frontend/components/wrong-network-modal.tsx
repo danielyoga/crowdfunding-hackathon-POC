@@ -1,4 +1,4 @@
-l"use client";
+"use client";
 
 import { useMockRole } from "@/contexts/MockRoleContext";
 import {
@@ -22,11 +22,11 @@ interface WrongNetworkModalProps {
 export function WrongNetworkModal({ 
   open, 
   onOpenChange,
-  targetChainId = 84532,
-  targetNetworkName = "Base Sepolia"
+  targetChainId = 31337,
+  targetNetworkName = "Localhost"
 }: WrongNetworkModalProps) {
   const { role, isInMockMode } = useMockRole();
-  const chainId = 84532; // Base Sepolia for mock mode
+  const chainId: number = 31337; // Localhost for development
 
   const handleSwitchNetwork = async () => {
     // In mock mode, network switching is not needed
@@ -34,12 +34,7 @@ export function WrongNetworkModal({
   };
 
   const getCurrentNetworkName = () => {
-    switch (chainId) {
-      case 84532: return "Base Sepolia";
-      case 8453: return "Base";
-      case 31337: return "Localhost";
-      default: return `Unknown (${chainId})`;
-    }
+    return "Localhost"; // For local development
   };
 
   return (

@@ -14,7 +14,7 @@ import { CampaignStateBadge } from "@/components/campaign-state-badge";
 import { DashboardSkeleton } from "@/components/loading-state";
 import { EmptyState } from "@/components/error-state";
 import { useMockRole } from "@/contexts/MockRoleContext";
-import { getFactoryAddress, SIMPLE_FACTORY_ABI, SIMPLE_CAMPAIGN_ABI, CampaignState, MilestoneState, RiskProfile } from "@/lib/contracts";
+import { getFactoryAddress, SIMPLE_FACTORY_ABI, SIMPLE_CAMPAIGN_ABI, ProjectState, MilestoneState, RiskProfile } from "@/lib/contracts";
 import { formatEth, formatPercentage, getRiskProfileLabel, truncateAddress, formatRelativeTime } from "@/lib/web3-utils";
 import { 
   Wallet, 
@@ -30,9 +30,9 @@ import {
 import Link from "next/link";
 
 interface Investment {
-  campaignAddress: string;
-  campaignTitle: string;
-  campaignState: CampaignState;
+  projectAddress: string;
+  projectTitle: string;
+  projectState: ProjectState;
   totalInvested: string;
   committedAmount: string;
   reserveAmount: string;
@@ -87,8 +87,8 @@ export default function MyInvestmentsPage() {
           
           // Calculate stats
           const totalInvested = userInvestments.reduce((sum, inv) => sum + parseFloat(inv.totalInvested), 0);
-          const activeInvestments = userInvestments.filter(inv => inv.campaignState === CampaignState.Development || inv.campaignState === CampaignState.Funding).length;
-          const completedInvestments = userInvestments.filter(inv => inv.campaignState === CampaignState.Completed).length;
+          const activeInvestments = userInvestments.filter(inv => inv.projectState === ProjectState.Development || inv.projectState === ProjectState.Funding).length;
+          const completedInvestments = userInvestments.filter(inv => inv.projectState === ProjectState.Completed).length;
           const pendingVotes = userInvestments.filter(inv => inv.needsVote).length;
           const availableRefunds = userInvestments
             .filter(inv => inv.hasRefund)
@@ -161,12 +161,12 @@ export default function MyInvestmentsPage() {
             const needsVote = false;
             
             // Check if has refund available
-            const hasRefund = Number(data.state) === CampaignState.Failed;
+            const hasRefund = Number(data.state) === ProjectState.Failed;
 
             return {
-              campaignAddress: address,
-              campaignTitle: data.title,
-              campaignState: Number(data.state) as CampaignState,
+              projectAddress: address,
+              projectTitle: data.title,
+              projectState: Number(data.state) as ProjectState,
               totalInvested: formatEth(contributionAmount),
               committedAmount: formatEth(contributionAmount), // Simple contract doesn't distinguish
               reserveAmount: "0", // Simple contract doesn't have reserve
@@ -191,8 +191,8 @@ export default function MyInvestmentsPage() {
 
         // Calculate stats
         const totalInvested = myInvestments.reduce((sum, inv) => sum + parseFloat(inv.totalInvested), 0);
-        const activeInvestments = myInvestments.filter(inv => inv.campaignState === CampaignState.Development || inv.campaignState === CampaignState.Funding).length;
-        const completedInvestments = myInvestments.filter(inv => inv.campaignState === CampaignState.Completed).length;
+        const activeInvestments = myInvestments.filter(inv => inv.projectState === ProjectState.Development || inv.projectState === ProjectState.Funding).length;
+        const completedInvestments = myInvestments.filter(inv => inv.projectState === ProjectState.Completed).length;
         const pendingVotes = myInvestments.filter(inv => inv.needsVote).length;
         const availableRefunds = myInvestments
           .filter(inv => inv.hasRefund)
@@ -352,19 +352,19 @@ export default function MyInvestmentsPage() {
             <div className="space-y-4">
               {investments.map((investment) => (
                 <Card 
-                  key={investment.campaignAddress}
+                  key={investment.projectAddress}
                   className={`hover:border-primary/50 transition-colors cursor-pointer ${investment.needsVote ? "border-purple-500/30" : ""}`}
-                  onClick={() => router.push(`/campaign/${investment.campaignAddress}`)}
+                  onClick={() => router.push(`/campaign/${investment.projectAddress}`)}
                 >
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row gap-6">
-                      {/* Campaign Info */}
+                      {/* Project Info */}
                       <div className="flex-1 space-y-4">
                         <div className="flex items-start justify-between gap-4">
                           <div>
                             <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-xl font-bold">{investment.campaignTitle}</h3>
-                              <CampaignStateBadge state={investment.campaignState} />
+                              <h3 className="text-xl font-bold">{investment.projectTitle}</h3>
+                              <CampaignStateBadge state={investment.projectState} />
                               {investment.needsVote && (
                                 <Badge className="bg-purple-500/20 text-purple-500 border-purple-500/30">
                                   🗳️ Vote Now
@@ -388,15 +388,15 @@ export default function MyInvestmentsPage() {
                         <div className="grid grid-cols-3 gap-4">
                           <div>
                             <p className="text-xs text-muted-foreground mb-1">Total Invested</p>
-                            <p className="text-lg font-bold">{investment.totalInvested} ETH</p>
+                            <p className="text-lg font-bold">{investment.totalInvested} IDRX</p>
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground mb-1">Committed</p>
-                            <p className="text-lg font-bold text-blue-500">{investment.committedAmount} ETH</p>
+                            <p className="text-lg font-bold text-blue-500">{investment.committedAmount} IDRX</p>
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground mb-1">Reserve</p>
-                            <p className="text-lg font-bold text-green-500">{investment.reserveAmount} ETH</p>
+                            <p className="text-lg font-bold text-green-500">{investment.reserveAmount} IDRX</p>
                           </div>
                         </div>
 
@@ -418,7 +418,7 @@ export default function MyInvestmentsPage() {
                             className="w-full bg-purple-500 hover:bg-purple-600"
                             asChild
                           >
-                            <Link href={`/campaign/${investment.campaignAddress}#voting-section`}>
+                            <Link href={`/campaign/${investment.projectAddress}#voting-section`}>
                               <Vote className="w-4 h-4 mr-2" />
                               Vote Now
                             </Link>
@@ -430,7 +430,7 @@ export default function MyInvestmentsPage() {
                             className="w-full bg-orange-500 hover:bg-orange-600"
                             asChild
                           >
-                            <Link href={`/campaign/${investment.campaignAddress}/refund`}>
+                            <Link href={`/campaign/${investment.projectAddress}/refund`}>
                               <DollarSign className="w-4 h-4 mr-2" />
                               Claim Refund
                             </Link>

@@ -1,10 +1,11 @@
 import { Milestone } from "@/lib/types";
 import { MilestoneStateBadge } from "@/components/campaign-state-badge";
 import { MilestoneState } from "@/lib/contracts";
-import { formatDate, formatCountdown } from "@/lib/web3-utils";
-import { CheckCircle2, Circle, Clock, ExternalLink } from "lucide-react";
+import { formatDate, formatCountdown, formatEth } from "@/lib/web3-utils";
+import { CheckCircle2, Circle, Clock, ExternalLink, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 interface MilestoneTimelineProps {
   milestones: Milestone[];
@@ -20,7 +21,7 @@ export function MilestoneTimeline({
   showVoteButton = false
 }: MilestoneTimelineProps) {
   const getMilestoneIcon = (index: number, state: MilestoneState) => {
-    if (state === MilestoneState.Completed || state === MilestoneState.Approved) {
+    if (state === MilestoneState.Completed) {
       return <CheckCircle2 className="w-5 h-5 text-green-500" />;
     }
     if (index === currentMilestone) {
@@ -35,7 +36,7 @@ export function MilestoneTimeline({
         const isActive = index === currentMilestone;
         const isPast = index < currentMilestone;
         const isFuture = index > currentMilestone;
-        const isVoting = milestone.state === MilestoneState.Voting;
+        const isVoting = milestone.state === MilestoneState.Submitted;
         
         return (
           <div key={index} className="relative">
@@ -82,43 +83,88 @@ export function MilestoneTimeline({
                   {milestone.description}
                 </p>
                 
-                {/* Deadline */}
-                <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
-                  <div>
-                    <span className="font-medium">Deadline: </span>
-                    {formatDate(milestone.deadline)}
-                  </div>
-                  {isActive && milestone.state === MilestoneState.Pending && (
-                    <div className="text-orange-500">
-                      {formatCountdown(milestone.deadline)} remaining
+                {/* Deadline - Only show if defined (not available in SimpleCampaign) */}
+                {milestone.deadline && milestone.deadline > 0 && (
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                    <div>
+                      <span className="font-medium">Deadline: </span>
+                      {formatDate(milestone.deadline)}
                     </div>
-                  )}
-                </div>
+                    {isActive && milestone.state === MilestoneState.Pending && (
+                      <div className="text-orange-500">
+                        {formatCountdown(milestone.deadline)} remaining
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 {/* Voting info */}
                 {isVoting && (
                   <div className="mt-3 p-3 bg-purple-500/10 border border-purple-500/20 rounded-md">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-3">
                       <span className="text-sm font-medium text-purple-400">Voting in Progress</span>
-                      <span className="text-xs text-muted-foreground">
-                        Ends: {formatDate(milestone.votingDeadline)}
-                      </span>
+                      {milestone.votingDeadline > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          {(() => {
+                            const now = Math.floor(Date.now() / 1000);
+                            const deadline = Number(milestone.votingDeadline);
+                            const timeRemaining = deadline - now;
+                            if (timeRemaining <= 0) return "Ended";
+                            if (timeRemaining > 86400) return `${Math.floor(timeRemaining / 86400)}d left`;
+                            if (timeRemaining > 3600) return `${Math.floor(timeRemaining / 3600)}h left`;
+                            return `${Math.floor(timeRemaining / 60)}m left`;
+                          })()}
+                        </span>
+                      )}
                     </div>
                     
-                    {/* Vote stats */}
-                    <div className="grid grid-cols-2 gap-2 text-sm mb-2">
-                      <div>
-                        <div className="text-xs text-muted-foreground">YES Votes</div>
-                        <div className="font-medium text-green-500">
-                          {((Number(milestone.yesVotes) / (Number(milestone.yesVotes) + Number(milestone.noVotes))) * 100 || 0).toFixed(1)}%
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-xs text-muted-foreground">NO Votes</div>
-                        <div className="font-medium text-red-500">
-                          {((Number(milestone.noVotes) / (Number(milestone.yesVotes) + Number(milestone.noVotes))) * 100 || 0).toFixed(1)}%
-                        </div>
-                      </div>
+                    {/* Vote stats with progress bars */}
+                    <div className="space-y-3 mb-3">
+                      {(() => {
+                        const totalVotes = Number(milestone.yesVotes) + Number(milestone.noVotes);
+                        const yesPercentage = totalVotes > 0 ? (Number(milestone.yesVotes) / totalVotes) * 100 : 0;
+                        const noPercentage = totalVotes > 0 ? (Number(milestone.noVotes) / totalVotes) * 100 : 0;
+                        
+                        return (
+                          <>
+                            <div>
+                              <div className="flex items-center justify-between text-xs mb-1">
+                                <span className="flex items-center gap-1 text-green-600">
+                                  <ThumbsUp className="w-3 h-3" />
+                                  YES
+                                </span>
+                                <span className="font-medium text-green-600">
+                                  {yesPercentage.toFixed(1)}%
+                                </span>
+                              </div>
+                              <Progress value={yesPercentage} className="h-1.5 bg-muted">
+                                <div className="h-full bg-green-500 transition-all" style={{ width: `${yesPercentage}%` }} />
+                              </Progress>
+                              <div className="text-xs text-muted-foreground mt-0.5">
+                                {formatEth(milestone.yesVotes)} ETH
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <div className="flex items-center justify-between text-xs mb-1">
+                                <span className="flex items-center gap-1 text-red-600">
+                                  <ThumbsDown className="w-3 h-3" />
+                                  NO
+                                </span>
+                                <span className="font-medium text-red-600">
+                                  {noPercentage.toFixed(1)}%
+                                </span>
+                              </div>
+                              <Progress value={noPercentage} className="h-1.5 bg-muted">
+                                <div className="h-full bg-red-500 transition-all" style={{ width: `${noPercentage}%` }} />
+                              </Progress>
+                              <div className="text-xs text-muted-foreground mt-0.5">
+                                {formatEth(milestone.noVotes)} ETH
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                     
                     {showVoteButton && onVote && (
@@ -127,7 +173,7 @@ export function MilestoneTimeline({
                         className="w-full"
                         onClick={() => onVote(index)}
                       >
-                        Vote on This Milestone
+                        Cast Your Vote
                       </Button>
                     )}
                   </div>

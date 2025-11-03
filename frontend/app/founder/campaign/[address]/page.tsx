@@ -27,9 +27,12 @@ import {
   BarChart3,
   Wallet,
   Calendar,
-  Edit
+  Edit,
+  Vote,
+  CheckCheck
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface MilestoneData {
   description: string;
@@ -64,6 +67,8 @@ export default function FounderCampaignPage() {
   const [campaign, setCampaign] = useState<CampaignData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isStarting, setIsStarting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   // Role-based access control - only founders can access this page
   useEffect(() => {
@@ -160,6 +165,7 @@ export default function FounderCampaignPage() {
 
       if (isInMockMode || !provider) {
         // Mock mode - update campaign state in localStorage
+        toast.info("Starting development phase...");
         const storedCampaigns = localStorage.getItem('mockCampaigns');
         if (storedCampaigns) {
           const campaigns = JSON.parse(storedCampaigns);
@@ -167,9 +173,10 @@ export default function FounderCampaignPage() {
           
           if (campaignIndex !== -1) {
             campaigns[campaignIndex].state = CampaignState.Development;
-            campaigns[campaignIndex].currentMilestone = 1;
+            campaigns[campaignIndex].currentMilestone = 0;
             localStorage.setItem('mockCampaigns', JSON.stringify(campaigns));
             
+            toast.success("Development phase started! 🚀");
             // Refresh campaign data
             await fetchCampaignData();
           }
@@ -179,19 +186,156 @@ export default function FounderCampaignPage() {
       }
 
       // Real Web3 mode - call smart contract
+      toast.info("Please confirm the transaction in your wallet...");
       const validatedAddress = ethers.getAddress(address);
       const signer = await provider.getSigner();
       const campaignContract = new ethers.Contract(validatedAddress, SIMPLE_CAMPAIGN_ABI, signer);
       
-      const tx = await campaignContract.startDevelopmentPhase();
+      const tx = await campaignContract.startDevelopment();
+      toast.info("Transaction submitted. Waiting for confirmation...");
       await tx.wait();
       
+      toast.success("Development phase started! 🚀");
       // Refresh campaign data
       await fetchCampaignData();
       setIsStarting(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error starting development phase:", err);
+      toast.error(err.message || "Failed to start development phase");
       setIsStarting(false);
+    }
+  }
+
+  async function handleSubmitMilestone(milestoneIndex: number) {
+    try {
+      setIsSubmitting(true);
+
+      if (isInMockMode || !provider) {
+        // Mock mode - update milestone state in localStorage
+        toast.info("Submitting milestone for voting...");
+        const storedCampaigns = localStorage.getItem('mockCampaigns');
+        if (storedCampaigns) {
+          const campaigns = JSON.parse(storedCampaigns);
+          const campaignIndex = campaigns.findIndex((c: any) => c.address === address);
+          
+          if (campaignIndex !== -1) {
+            // Initialize milestones array if not exists
+            if (!campaigns[campaignIndex].milestones) {
+              campaigns[campaignIndex].milestones = [{}, {}, {}];
+            }
+            
+            // Set milestone as submitted with voting deadline (7 days from now)
+            const now = Math.floor(Date.now() / 1000);
+            campaigns[campaignIndex].milestones[milestoneIndex] = {
+              ...campaigns[campaignIndex].milestones[milestoneIndex],
+              state: MilestoneState.Submitted,
+              submittedAt: now,
+              votingDeadline: now + (7 * 24 * 60 * 60), // 7 days
+              yesVotes: 0,
+              noVotes: 0,
+              voters: []
+            };
+            
+            localStorage.setItem('mockCampaigns', JSON.stringify(campaigns));
+            
+            toast.success("Milestone submitted! Voting period has started (7 days). 🗳️");
+            // Refresh campaign data
+            await fetchCampaignData();
+          }
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Real Web3 mode - call smart contract
+      toast.info("Please confirm the transaction in your wallet...");
+      const validatedAddress = ethers.getAddress(address);
+      const signer = await provider.getSigner();
+      const campaignContract = new ethers.Contract(validatedAddress, SIMPLE_CAMPAIGN_ABI, signer);
+      
+      const tx = await campaignContract.submitMilestone(milestoneIndex);
+      toast.info("Transaction submitted. Waiting for confirmation...");
+      await tx.wait();
+      
+      toast.success("Milestone submitted! Voting period has started (7 days). 🗳️");
+      // Refresh campaign data
+      await fetchCampaignData();
+      setIsSubmitting(false);
+    } catch (err: any) {
+      console.error("Error submitting milestone:", err);
+      toast.error(err.message || "Failed to submit milestone");
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleFinalizeVoting(milestoneIndex: number) {
+    try {
+      setIsFinalizing(true);
+
+      if (isInMockMode || !provider) {
+        // Mock mode - finalize voting in localStorage
+        toast.info("Finalizing voting...");
+        const storedCampaigns = localStorage.getItem('mockCampaigns');
+        if (storedCampaigns) {
+          const campaigns = JSON.parse(storedCampaigns);
+          const campaignIndex = campaigns.findIndex((c: any) => c.address === address);
+          
+          if (campaignIndex !== -1) {
+            const milestone = campaigns[campaignIndex].milestones[milestoneIndex];
+            const totalVotes = (parseFloat(milestone.yesVotes) || 0) + (parseFloat(milestone.noVotes) || 0);
+            const yesPercentage = totalVotes > 0 ? ((parseFloat(milestone.yesVotes) || 0) / totalVotes) * 100 : 0;
+            
+            // Check if approved (>50% YES votes)
+            if (yesPercentage > 50) {
+              // Milestone approved - mark as completed and move to next
+              milestone.state = MilestoneState.Completed;
+              campaigns[campaignIndex].currentMilestone = milestoneIndex + 1;
+              
+              toast.success("Milestone approved and completed! Funds released. 💰");
+              
+              // Check if all milestones completed
+              if (campaigns[campaignIndex].currentMilestone >= 3) {
+                campaigns[campaignIndex].state = CampaignState.Completed;
+                toast.success("All milestones completed! Campaign finished. 🎉");
+              }
+            } else {
+              // Milestone rejected - reset to Pending for resubmission
+              milestone.state = MilestoneState.Pending;
+              milestone.yesVotes = 0;
+              milestone.noVotes = 0;
+              milestone.voters = [];
+              
+              toast.error("Milestone rejected. Please improve and resubmit. ❌");
+            }
+            
+            localStorage.setItem('mockCampaigns', JSON.stringify(campaigns));
+            
+            // Refresh campaign data
+            await fetchCampaignData();
+          }
+        }
+        setIsFinalizing(false);
+        return;
+      }
+
+      // Real Web3 mode - call smart contract
+      toast.info("Please confirm the transaction in your wallet...");
+      const validatedAddress = ethers.getAddress(address);
+      const signer = await provider.getSigner();
+      const campaignContract = new ethers.Contract(validatedAddress, SIMPLE_CAMPAIGN_ABI, signer);
+      
+      const tx = await campaignContract.finalizeVoting(milestoneIndex);
+      toast.info("Transaction submitted. Waiting for confirmation...");
+      await tx.wait();
+      
+      toast.success("Voting finalized! Check the results.");
+      // Refresh campaign data
+      await fetchCampaignData();
+      setIsFinalizing(false);
+    } catch (err: any) {
+      console.error("Error finalizing voting:", err);
+      toast.error(err.message || "Failed to finalize voting");
+      setIsFinalizing(false);
     }
   }
 
@@ -505,52 +649,89 @@ export default function FounderCampaignPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {campaign.milestones.map((milestone, index) => (
-                  <div
-                    key={index}
-                    className={`p-4 border rounded-lg ${
-                      index === campaign.currentMilestone - 1
-                        ? "border-primary bg-primary/5"
-                        : ""
-                    }`}
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold flex-shrink-0">
-                        M{index + 1}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold">{milestone.description}</h4>
-                          <MilestoneStateBadge state={milestone.state} />
-                          {index === campaign.currentMilestone - 1 && (
-                            <Badge variant="outline" className="text-xs">
-                              Current
+                {campaign.milestones.map((milestone, index) => {
+                  const isCurrent = index === campaign.currentMilestone;
+                  const isPending = milestone.state === MilestoneState.Pending;
+                  const isSubmitted = milestone.state === MilestoneState.Submitted;
+                  const isCompleted = milestone.state === MilestoneState.Completed;
+                  
+                  return (
+                    <div
+                      key={index}
+                      className={`p-4 border rounded-lg ${
+                        isCurrent ? "border-primary bg-primary/5" : ""
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                          M{index}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold">{milestone.description}</h4>
+                            <MilestoneStateBadge state={milestone.state} />
+                            {isCurrent && (
+                              <Badge variant="outline" className="text-xs">
+                                Current
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex gap-6 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Target className="w-4 h-4" />
+                              <span>Release: {milestone.releasePercentage}%</span>
+                            </div>
+                            {milestone.deadline && (
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                <span>Deadline: {milestone.deadline} days</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Action buttons based on milestone state */}
+                        <div className="flex flex-col gap-2">
+                          {isCurrent && isPending && campaign.state === CampaignState.Development && (
+                            <Button 
+                              size="sm"
+                              onClick={() => handleSubmitMilestone(index)}
+                              disabled={isSubmitting}
+                            >
+                              <Upload className="w-4 h-4 mr-2" />
+                              {isSubmitting ? "Submitting..." : "Submit"}
+                            </Button>
+                          )}
+                          
+                          {isSubmitted && isCurrent && (
+                            <>
+                              <Badge variant="secondary" className="text-xs">
+                                <Vote className="w-3 h-3 mr-1" />
+                                Voting Active
+                              </Badge>
+                              <Button 
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleFinalizeVoting(index)}
+                                disabled={isFinalizing}
+                              >
+                                <CheckCheck className="w-4 h-4 mr-2" />
+                                {isFinalizing ? "Finalizing..." : "Finalize"}
+                              </Button>
+                            </>
+                          )}
+                          
+                          {isCompleted && (
+                            <Badge variant="default" className="text-xs">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Completed
                             </Badge>
                           )}
                         </div>
-                        <div className="flex gap-6 text-sm text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Target className="w-4 h-4" />
-                            <span>Release: {milestone.releasePercentage}%</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            <span>Deadline: {milestone.deadline} days</span>
-                          </div>
-                        </div>
                       </div>
-                      {index === campaign.currentMilestone - 1 &&
-                        campaign.state === CampaignState.Development && (
-                          <Button size="sm" asChild>
-                            <Link href={`/founder/campaign/${address}/submit/${index + 1}`}>
-                              <Upload className="w-4 h-4 mr-2" />
-                              Submit
-                            </Link>
-                          </Button>
-                        )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -604,13 +785,30 @@ export default function FounderCampaignPage() {
                     {isStarting ? "Starting..." : "Start Development Phase"}
                   </Button>
                 )}
-                {campaign.state === CampaignState.Development && campaign.currentMilestone <= campaign.milestones.length && (
-                  <Button className="w-full justify-start" asChild>
-                    <Link href={`/founder/campaign/${address}/submit/${campaign.currentMilestone}`}>
-                      <Upload className="w-4 h-4 mr-2" />
-                      Submit Current Milestone
-                    </Link>
-                  </Button>
+                {campaign.state === CampaignState.Development && campaign.currentMilestone < campaign.milestones.length && (
+                  <>
+                    {campaign.milestones[campaign.currentMilestone]?.state === MilestoneState.Pending && (
+                      <Button 
+                        className="w-full justify-start"
+                        onClick={() => handleSubmitMilestone(campaign.currentMilestone)}
+                        disabled={isSubmitting}
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        {isSubmitting ? "Submitting..." : `Submit Milestone ${campaign.currentMilestone}`}
+                      </Button>
+                    )}
+                    {campaign.milestones[campaign.currentMilestone]?.state === MilestoneState.Submitted && (
+                      <Button 
+                        variant="outline"
+                        className="w-full justify-start"
+                        onClick={() => handleFinalizeVoting(campaign.currentMilestone)}
+                        disabled={isFinalizing}
+                      >
+                        <CheckCheck className="w-4 h-4 mr-2" />
+                        {isFinalizing ? "Finalizing..." : `Finalize Voting ${campaign.currentMilestone}`}
+                      </Button>
+                    )}
+                  </>
                 )}
               </CardContent>
             </Card>

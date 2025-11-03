@@ -1,8 +1,8 @@
 // TypeScript types for the crowdfunding platform
 
-import { CampaignState, MilestoneState, RiskProfile } from "./contracts";
+import { ProjectState, MilestoneState, RiskProfile } from "./contracts";
 
-export interface CampaignData {
+export interface ProjectData {
   title: string;
   description: string;
   founder: string;
@@ -10,22 +10,22 @@ export interface CampaignData {
   totalRaised: bigint;
   totalCommitted: bigint;
   totalReserve: bigint;
-  state: CampaignState;
+  state: ProjectState;
   currentMilestone: number;
   createdAt: bigint;
 }
 
 export interface Milestone {
   description: string;
-  releasePercentage: number; // 0-100
-  deadline: bigint; // Unix timestamp
+  releasePercentage: number; // 0-100 or basis points (0-10000)
+  deadline?: bigint; // Unix timestamp (optional for SimpleCampaign)
   state: MilestoneState;
-  ipfsHash: string;
+  ipfsHash?: string; // Optional
   submittedAt: bigint;
   votingDeadline: bigint;
   yesVotes: bigint;
   noVotes: bigint;
-  rejectionCount: number;
+  rejectionCount?: number; // Optional
 }
 
 export interface Contribution {
@@ -40,15 +40,15 @@ export interface Contribution {
   autoYesMode: boolean;
 }
 
-export interface CampaignWithAddress {
+export interface ProjectWithAddress {
   address: string;
-  data: CampaignData;
+  data: ProjectData;
   milestones: Milestone[];
   contributors: Contribution[];
   userContribution?: Contribution;
 }
 
-export interface CampaignCardData {
+export interface ProjectCardData {
   address: string;
   title: string;
   description: string;
@@ -56,7 +56,7 @@ export interface CampaignCardData {
   fundingGoal: string; // Formatted ETH string
   totalRaised: string; // Formatted ETH string
   progress: number; // Percentage 0-100
-  state: CampaignState;
+  state: ProjectState;
   stateLabel: string;
   currentMilestone: number;
   totalMilestones: number;
@@ -72,12 +72,19 @@ export interface MilestoneFormData {
   deadline: number; // Days from now
 }
 
-export interface CreateCampaignFormData {
+export interface CreateProjectFormData {
   title: string;
   description: string;
   fundingGoal: string;
   milestones: MilestoneFormData[];
 }
+
+// Backward compatibility type aliases
+export type CampaignData = ProjectData;
+export type CampaignWithAddress = ProjectWithAddress;
+export type CampaignCardData = ProjectCardData;
+export type CreateCampaignFormData = CreateProjectFormData;
+export { ProjectState as CampaignState };
 
 export interface VotingStats {
   yesVotes: string; // ETH

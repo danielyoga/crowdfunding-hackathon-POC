@@ -68,7 +68,7 @@ describe("Simple Integration Tests - End-to-End Scenarios", function () {
       // Verify funding
       const campaignData = await campaign.getCampaignData();
       expect(campaignData.totalRaised).to.equal(ethers.parseEther("50"));
-      expect(campaignData.state).to.equal(0); // Active
+      expect(campaignData.state).to.equal(1); // Development (auto-transitioned when goal reached)
 
       // Step 2: Complete milestones
       // Milestone 1: 30% release
@@ -103,7 +103,7 @@ describe("Simple Integration Tests - End-to-End Scenarios", function () {
 
       // Verify campaign completion
       const finalCampaignData = await campaign.getCampaignData();
-      expect(finalCampaignData.state).to.equal(1); // Completed
+      expect(finalCampaignData.state).to.equal(2); // Completed
     });
 
     it("Should handle campaign failure and refunds", async function () {
@@ -123,7 +123,7 @@ describe("Simple Integration Tests - End-to-End Scenarios", function () {
       await campaign.connect(founder).failCampaign();
       
       const campaignData = await campaign.getCampaignData();
-      expect(campaignData.state).to.equal(2); // Failed
+      expect(campaignData.state).to.equal(3); // Failed
 
       // Claim refunds
       for (let i = 0; i < 4; i++) {
@@ -148,12 +148,12 @@ describe("Simple Integration Tests - End-to-End Scenarios", function () {
       
       // Verify milestone state
       const milestone0 = await campaign.getMilestone(0);
-      expect(milestone0.state).to.equal(1); // Completed
+      expect(milestone0.state).to.equal(2); // Completed
       expect(await campaign.currentMilestone()).to.equal(1);
 
-      // Campaign should still be active
+      // Campaign should still be in development
       const campaignData = await campaign.getCampaignData();
-      expect(campaignData.state).to.equal(0); // Active
+      expect(campaignData.state).to.equal(1); // Development
     });
   });
 
@@ -173,9 +173,9 @@ describe("Simple Integration Tests - End-to-End Scenarios", function () {
       const SimpleCampaign = await ethers.getContractFactory("SimpleCampaign");
       const campaign2 = SimpleCampaign.attach(campaign2Address) as SimpleCampaign;
 
-      // Fund both campaigns
-      await campaign.connect(contributors[1]).fund({ value: ethers.parseEther("25") });
-      await campaign2.connect(contributors[2]).fund({ value: ethers.parseEther("15") });
+      // Fund both campaigns to their goals
+      await campaign.connect(contributors[1]).fund({ value: FUNDING_GOAL });
+      await campaign2.connect(contributors[2]).fund({ value: ethers.parseEther("30") });
 
       // Complete milestones in both campaigns
       await campaign.connect(founder).completeMilestone(0);
@@ -185,8 +185,8 @@ describe("Simple Integration Tests - End-to-End Scenarios", function () {
       const campaign1Data = await campaign.getCampaignData();
       const campaign2Data = await campaign2.getCampaignData();
       
-      expect(campaign1Data.totalRaised).to.equal(ethers.parseEther("25"));
-      expect(campaign2Data.totalRaised).to.equal(ethers.parseEther("15"));
+      expect(campaign1Data.totalRaised).to.equal(FUNDING_GOAL);
+      expect(campaign2Data.totalRaised).to.equal(ethers.parseEther("30"));
     });
   });
 
@@ -195,19 +195,22 @@ describe("Simple Integration Tests - End-to-End Scenarios", function () {
       // Fund exactly to the goal
       await campaign.connect(contributors[0]).fund({ value: FUNDING_GOAL });
 
-      // Should not allow additional funding
+      // Should not allow additional funding (campaign is now in Development state)
       await expect(
         campaign.connect(contributors[1]).fund({ value: ethers.parseEther("1") })
-      ).to.be.revertedWithCustomError(campaign, "FundingGoalReached");
+      ).to.be.revertedWithCustomError(campaign, "InvalidState");
     });
 
     it("Should handle zero funding milestone completion", async function () {
+      // Fund the campaign first to reach development state
+      await campaign.connect(contributors[0]).fund({ value: FUNDING_GOAL });
+      
       // Complete milestone with no funding
       await expect(campaign.connect(founder).completeMilestone(0))
         .to.not.be.reverted;
 
       const milestone = await campaign.getMilestone(0);
-      expect(milestone.state).to.equal(1); // Completed
+      expect(milestone.state).to.equal(2); // Completed
     });
 
     it("Should prevent operations on completed campaign", async function () {
@@ -220,17 +223,17 @@ describe("Simple Integration Tests - End-to-End Scenarios", function () {
       // Should not allow additional funding
       await expect(
         campaign.connect(contributors[1]).fund({ value: ethers.parseEther("1") })
-      ).to.be.revertedWithCustomError(campaign, "CampaignNotActive");
+      ).to.be.revertedWithCustomError(campaign, "InvalidState");
 
       // Should not allow milestone completion
       await expect(
         campaign.connect(founder).completeMilestone(0)
-      ).to.be.revertedWithCustomError(campaign, "CampaignNotActive");
+      ).to.be.revertedWithCustomError(campaign, "InvalidState");
     });
 
     it("Should handle refunds after partial milestone completion", async function () {
       // Fund and complete one milestone
-      await campaign.connect(contributors[0]).fund({ value: ethers.parseEther("30") });
+      await campaign.connect(contributors[0]).fund({ value: FUNDING_GOAL });
       await campaign.connect(founder).completeMilestone(0);
 
       // Fail the campaign
@@ -242,7 +245,7 @@ describe("Simple Integration Tests - End-to-End Scenarios", function () {
       const contributorBalanceAfter = await ethers.provider.getBalance(await contributors[0].getAddress());
       
       // Should refund the remaining amount (70% of original contribution)
-      const expectedRefund = ethers.parseEther("30") * 7000n / 10000n; // 21 ETH
+      const expectedRefund = FUNDING_GOAL * 7000n / 10000n; // 7 ETH
       expect(contributorBalanceAfter - contributorBalanceBefore).to.be.closeTo(
         expectedRefund,
         ethers.parseEther("0.01")

@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useMockRole } from "@/contexts/MockRoleContext";
 import { getFactoryAddress, SIMPLE_FACTORY_ABI } from "@/lib/contracts";
-import { CreateCampaignFormData, MilestoneFormData } from "@/lib/types";
+import { CreateProjectFormData, MilestoneFormData } from "@/lib/types";
 import { validateEthAmount, formatEth, parseEthInput, generateMockAddress } from "@/lib/web3-utils";
 import { 
   AlertCircle, 
@@ -32,35 +32,51 @@ import { toast } from "sonner";
 
 const MILESTONE_PRESETS = {
   standard: [
-    { percentage: 10, days: 30 },
-    { percentage: 20, days: 90 },
-    { percentage: 25, days: 150 },
-    { percentage: 25, days: 240 },
-    { percentage: 20, days: 330 },
+    { percentage: 30, days: 30 },
+    { percentage: 40, days: 90 },
+    { percentage: 30, days: 150 },
   ],
   conservative: [
-    { percentage: 5, days: 30 },
-    { percentage: 15, days: 90 },
-    { percentage: 20, days: 150 },
-    { percentage: 30, days: 240 },
-    { percentage: 30, days: 330 },
+    { percentage: 20, days: 30 },
+    { percentage: 30, days: 90 },
+    { percentage: 50, days: 150 },
   ],
   aggressive: [
-    { percentage: 25, days: 30 },
-    { percentage: 25, days: 90 },
+    { percentage: 50, days: 30 },
+    { percentage: 30, days: 90 },
     { percentage: 20, days: 150 },
-    { percentage: 15, days: 240 },
-    { percentage: 15, days: 330 },
   ],
 };
 
-export default function CreateCampaignPage() {
+export default function CreateProjectPage() {
   const router = useRouter();
   const { role, mockAccount, isInMockMode } = useMockRole();
   const account = mockAccount;
   const isConnected = !!role;
-  const chainId = 84532; // Base Sepolia for mock mode
-  const signer = null; // No signer needed in mock mode
+  const chainId = 31337; // Localhost for testing
+  const [provider, setProvider] = useState<ethers.JsonRpcProvider | null>(null);
+  const [signer, setSigner] = useState<ethers.JsonRpcSigner | null>(null);
+
+  // Initialize provider and signer
+  useEffect(() => {
+    const initProvider = async () => {
+      if (typeof window !== "undefined" && !isInMockMode) {
+        try {
+          const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545";
+          const jsonRpcProvider = new ethers.JsonRpcProvider(rpcUrl);
+          setProvider(jsonRpcProvider);
+          
+          // Get signer from first account
+          const signerInstance = await jsonRpcProvider.getSigner(0);
+          setSigner(signerInstance);
+        } catch (error) {
+          console.error("Failed to initialize provider:", error);
+        }
+      }
+    };
+    
+    initProvider();
+  }, [isInMockMode])
 
   const [step, setStep] = useState(1);
   const [isCreating, setIsCreating] = useState(false);
@@ -73,11 +89,11 @@ export default function CreateCampaignPage() {
   }, [isConnected, role, router]);
 
   // Form data
-  const [formData, setFormData] = useState<CreateCampaignFormData>({
+  const [formData, setFormData] = useState<CreateProjectFormData>({
     title: "",
     description: "",
     fundingGoal: "",
-    milestones: Array(5).fill(null).map(() => ({
+    milestones: Array(3).fill(null).map(() => ({ // Changed from 5 to 3 milestones
       description: "",
       releasePercentage: 0,
       deadline: 0,
@@ -100,11 +116,16 @@ export default function CreateCampaignPage() {
 
     const goalValidation = validateEthAmount(
       formData.fundingGoal,
-      ethers.parseEther("0.01"),
+      ethers.parseEther("1"),
       ethers.parseEther("10000")
     );
     if (!goalValidation.isValid) {
       newErrors.fundingGoal = goalValidation.error || "Invalid funding goal";
+    }
+    
+    // Additional validation: ensure it's an integer
+    if (formData.fundingGoal && !/^\d+$/.test(formData.fundingGoal)) {
+      newErrors.fundingGoal = "Funding goal must be a whole number (integer)";
     }
 
     setErrors(newErrors);
@@ -123,8 +144,8 @@ export default function CreateCampaignPage() {
       if (milestone.description.length > 200) {
         newErrors[`milestone${index}Description`] = "Description too long (max 200 chars)";
       }
-      if (milestone.releasePercentage < 5 || milestone.releasePercentage > 50) {
-        newErrors[`milestone${index}Percentage`] = "Must be 5-50%";
+      if (milestone.releasePercentage < 10 || milestone.releasePercentage > 70) {
+        newErrors[`milestone${index}Percentage`] = "Must be 10-70%";
       }
       if (milestone.deadline < 7 || milestone.deadline > 365) {
         newErrors[`milestone${index}Deadline`] = "Must be 7-365 days";
@@ -180,104 +201,72 @@ export default function CreateCampaignPage() {
       return;
     }
 
+    // Check if blockchain is ready
+    if (!signer) {
+      toast.error("Blockchain connection not ready. Please wait a moment and try again.");
+      return;
+    }
+
     try {
       setIsCreating(true);
 
-      // Mock mode - simulate campaign creation
-      if (isInMockMode || !signer || !chainId) {
-        toast.info("Creating your campaign...");
-        
-        // Simulate transaction delay
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        // Create mock campaign and save to localStorage
-        const newCampaign = {
-          address: generateMockAddress(),
-          title: formData.title,
-          description: formData.description,
-          founder: account || "",
-          fundingGoal: formData.fundingGoal,
-          totalRaised: "0",
-          progress: 0,
-          state: 0, // Active
-          stateLabel: "Active",
-          currentMilestone: 1,
-          totalMilestones: 5,
-          contributorsCount: 0,
-          createdAt: new Date(),
-        };
-
-        // Load existing campaigns from localStorage
-        const storedCampaigns = localStorage.getItem('mockCampaigns');
-        const campaigns = storedCampaigns ? JSON.parse(storedCampaigns) : [];
-        
-        // Add new campaign
-        campaigns.unshift(newCampaign);
-        
-        // Save back to localStorage
-        localStorage.setItem('mockCampaigns', JSON.stringify(campaigns));
-        
-        toast.success("Campaign created successfully! 🎉");
-        
-        // Redirect to campaigns page
-        router.push("/my-campaigns");
-        return;
-      }
-
-      // Real Web3 mode
-      toast.info("Please confirm the transaction in your wallet...");
+      // Create campaign on blockchain
+      toast.info("Creating campaign on blockchain...");
 
       const factoryAddress = getFactoryAddress(chainId);
-      // Validate and normalize the address to prevent ENS resolution
       const validatedFactoryAddress = ethers.getAddress(factoryAddress);
       const factory = new ethers.Contract(validatedFactoryAddress, SIMPLE_FACTORY_ABI, signer);
 
       // Get creation fee
       const creationFee = await factory.creationFee();
 
-      // Prepare milestone data
-      const milestoneDescriptions = formData.milestones.map(m => m.description);
-      const milestonePercentages = formData.milestones.map(m => m.releasePercentage);
-      const milestoneDeadlines = formData.milestones.map(m => {
-        const now = Math.floor(Date.now() / 1000);
-        return now + (m.deadline * 24 * 60 * 60); // Convert days to seconds
-      });
+      // Prepare milestone data (SimpleFactory requires exactly 3 milestones)
+      const milestoneDescriptions: [string, string, string] = [
+        formData.milestones[0].description,
+        formData.milestones[1].description,
+        formData.milestones[2].description
+      ];
+      
+      const milestonePercentages: [number, number, number] = [
+        formData.milestones[0].releasePercentage * 100, // Convert to basis points
+        formData.milestones[1].releasePercentage * 100,
+        formData.milestones[2].releasePercentage * 100
+      ];
 
-      // Create campaign
-      const tx = await factory.createCampaign(
+      // Create project (not campaign - that's the function name)
+      const tx = await factory.createProject(
         formData.title,
         formData.description,
         parseEthInput(formData.fundingGoal),
         milestoneDescriptions,
         milestonePercentages,
-        milestoneDeadlines,
         { value: creationFee }
       );
 
-      toast.info("Transaction submitted. Creating your campaign...");
+      toast.info("Transaction submitted. Waiting for confirmation...");
       const receipt = await tx.wait();
 
-      // Get the campaign address from the event
+      // Get the project address from the event
       const event = receipt.logs.find((log: any) => {
         try {
           const parsed = factory.interface.parseLog(log);
-          return parsed?.name === "CampaignCreated";
+          return parsed?.name === "ProjectCreated";
         } catch {
           return false;
         }
       });
 
-      let campaignAddress = "";
+      let projectAddress = "";
       if (event) {
         const parsed = factory.interface.parseLog(event);
-        campaignAddress = parsed?.args.campaign;
+        projectAddress = parsed?.args.projectAddress;
       }
 
-      toast.success("Campaign created successfully! 🎉");
+      toast.success("Campaign created successfully on blockchain! 🎉");
 
-      // Redirect to campaign page or founder dashboard
-      if (campaignAddress) {
-        router.push(`/campaign/${campaignAddress}`);
+      // Redirect to campaign page
+      if (projectAddress) {
+        router.push(`/campaign/${projectAddress}`);
       } else {
         router.push("/my-campaigns");
       }
@@ -421,27 +410,55 @@ export default function CreateCampaignPage() {
                   <div className="relative">
                     <Input
                       id="fundingGoal"
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      max="10000"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
                       placeholder="10"
                       value={formData.fundingGoal}
-                      onChange={(e) => setFormData({ ...formData, fundingGoal: e.target.value })}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Only allow empty string or positive integers
+                        if (value === '' || /^[0-9]+$/.test(value)) {
+                          setFormData({ ...formData, fundingGoal: value });
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        // Prevent non-numeric characters, decimal point, minus, plus, and e
+                        if (
+                          e.key === '.' || 
+                          e.key === '-' || 
+                          e.key === '+' ||
+                          e.key === 'e' || 
+                          e.key === 'E' ||
+                          e.key === ',' ||
+                          !/[0-9]/.test(e.key) && 
+                          !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter'].includes(e.key) &&
+                          !e.ctrlKey && !e.metaKey
+                        ) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onPaste={(e) => {
+                        // Prevent pasting non-numeric values
+                        const pastedText = e.clipboardData.getData('text');
+                        if (!/^[0-9]+$/.test(pastedText)) {
+                          e.preventDefault();
+                        }
+                      }}
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       ETH
                     </span>
                   </div>
                   <p className={errors.fundingGoal ? "text-xs text-red-500" : "text-xs text-muted-foreground"}>
-                    {errors.fundingGoal || "Minimum: 0.01 ETH, Maximum: 10,000 ETH"}
+                    {errors.fundingGoal || "Minimum: 1 ETH, Maximum: 10,000 ETH (integers only)"}
                   </p>
                 </div>
 
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
-                    Your campaign will require 5 milestones with specific release percentages and deadlines
+                    Your campaign will require 3 milestones with specific release percentages and deadlines
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -453,7 +470,7 @@ export default function CreateCampaignPage() {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Define 5 Milestones</CardTitle>
+                  <CardTitle>Define 3 Milestones</CardTitle>
                   <CardDescription>
                     Set up your project milestones with delivery deadlines and fund release percentages
                   </CardDescription>
@@ -584,8 +601,8 @@ export default function CreateCampaignPage() {
                       </span>
                     </div>
                     <Progress value={totalPercentage} className="h-2" />
-                    {errors.totalPercentage && (
-                      <p className="text-xs text-red-500 mt-2">{errors.totalPercentage}</p>
+                    {totalPercentage !== 100 && (
+                      <p className="text-xs text-red-500 mt-2">Total must be 100% (currently {totalPercentage}%)</p>
                     )}
                   </div>
                 </CardContent>
@@ -614,7 +631,7 @@ export default function CreateCampaignPage() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Funding Goal:</span>
-                        <span className="font-medium">{formData.fundingGoal} ETH</span>
+                        <span className="font-medium">{formData.fundingGoal} IDRX</span>
                       </div>
                     </div>
                     <div className="mt-3">
@@ -648,6 +665,25 @@ export default function CreateCampaignPage() {
 
                   <Separator />
 
+                  {/* Blockchain Connection Status */}
+                  {!signer ? (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        ⚠️ Connecting to blockchain... Please wait before creating your campaign.
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <Alert>
+                      <CheckCircle className="h-4 w-4" />
+                      <AlertDescription>
+                        ✅ Connected to blockchain. Ready to create your campaign!
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  <Separator />
+
                   {/* Creation Fee Info */}
                   <Alert>
                     <Info className="h-4 w-4" />
@@ -679,11 +715,13 @@ export default function CreateCampaignPage() {
             ) : (
               <Button
                 onClick={handleCreate}
-                disabled={isCreating}
+                disabled={isCreating || !signer}
                 className="bg-primary"
               >
-                {isCreating ? (
-                  <>Creating...</>
+                {!signer ? (
+                  <>Connecting to blockchain...</>
+                ) : isCreating ? (
+                  <>Creating on blockchain...</>
                 ) : (
                   <>
                     <PlusCircle className="w-4 h-4 mr-2" />

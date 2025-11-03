@@ -53,12 +53,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <head>
+      <head suppressHydrationWarning>
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-background text-foreground overflow-x-hidden`} suppressHydrationWarning>
-        <div className="galactic-bg" />
+        <div className="galactic-bg" suppressHydrationWarning />
         <Providers>
           {children}
         </Providers>

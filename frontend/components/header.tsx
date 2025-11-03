@@ -25,17 +25,17 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border" suppressHydrationWarning>
+        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between" suppressHydrationWarning>
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center" suppressHydrationWarning>
               <span className="text-primary-foreground font-bold text-lg">👁</span>
             </div>
             <span className="font-bold text-xl text-primary">GRU</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-6" suppressHydrationWarning>
             <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition">
               Home
             </Link>
@@ -54,7 +54,7 @@ export function Header() {
             )}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3" suppressHydrationWarning>
             {isConnected && role === "founder" && (
               <Button asChild variant="outline" size="sm">
                 <Link href="/create">
@@ -65,7 +65,7 @@ export function Header() {
             )}
             
             {isConnected ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3" suppressHydrationWarning>
                 {/* Wallet Info - Always Visible */}
                 <div className="px-3 py-2 bg-muted rounded-md border">
                   <div className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function Header() {
 
           {/* Mobile Navigation */}
           {isOpen && (
-            <div className="absolute top-16 left-0 right-0 bg-background border-b border-border md:hidden">
+            <div className="absolute top-16 left-0 right-0 bg-background border-b border-border md:hidden" suppressHydrationWarning>
               <div className="flex flex-col gap-4 p-4">
                 <Link href="/" className="text-sm text-muted-foreground hover:text-foreground" onClick={() => setIsOpen(false)}>
                   Home

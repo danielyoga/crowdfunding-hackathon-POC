@@ -22,7 +22,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <MockRoleProvider>
         {children}
-        <Toaster position="top-right" />
+        <Toaster 
+          position="top-right" 
+          toastOptions={{
+            style: {
+              marginTop: '4.5rem', // 72px - slightly below the 64px navbar
+            },
+          }}
+        />
       </MockRoleProvider>
     </QueryClientProvider>
   )

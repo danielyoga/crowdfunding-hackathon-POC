@@ -26,16 +26,16 @@ export function RoleSelector() {
   // Prevent hydration mismatch by only rendering on client
   if (!isClient) {
     return (
-      <div className="flex items-center gap-3">
-        <div className="h-9 w-32 bg-muted animate-pulse rounded-md" />
-        <div className="h-9 w-32 bg-muted animate-pulse rounded-md" />
+      <div className="flex items-center gap-3" suppressHydrationWarning>
+        <div className="h-9 w-32 bg-muted animate-pulse rounded-md" suppressHydrationWarning />
+        <div className="h-9 w-32 bg-muted animate-pulse rounded-md" suppressHydrationWarning />
       </div>
     );
   }
 
   if (!role) {
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3" suppressHydrationWarning>
         <Button
           variant="outline"
           size="sm"
@@ -66,7 +66,7 @@ export function RoleSelector() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <div className="w-2 h-2 rounded-full bg-green-500" suppressHydrationWarning />
           <span className="font-mono">{truncateAddress(mockAccount!)}</span>
           <Badge variant="secondary" className="text-xs px-1.5 py-0">
             {mockBalance} ETH

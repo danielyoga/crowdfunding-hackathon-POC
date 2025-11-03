@@ -1,4 +1,17 @@
 {
+  "app/browse/page.tsx -> @/lib/contracts": {
+    "id": "app/browse/page.tsx -> @/lib/contracts",
+    "files": []
+  },
+  "app/browse/page.tsx -> ethers": {
+    "id": "app/browse/page.tsx -> ethers",
+    "files": [
+      "static/chunks/npm.ethers.js",
+      "static/chunks/npm.noble.js",
+      "static/chunks/npm.adraffy.js",
+      "static/chunks/npm.aes-js.js"
+    ]
+  },
   "node_modules/viem/_esm/actions/public/call.js -> ../../utils/ccip.js": {
     "id": "node_modules/viem/_esm/actions/public/call.js -> ../../utils/ccip.js",
     "files": []

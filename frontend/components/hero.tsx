@@ -10,18 +10,18 @@ export function Hero() {
   const isConnected = !!role // Using mock role instead of wagmi
 
   return (
-    <section id="hero" className="relative overflow-hidden py-20 sm:py-32 lg:py-40">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-20 right-10 w-96 h-96 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full blur-3xl opacity-15" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-purple-600 to-indigo-700 rounded-full blur-3xl opacity-20" />
-        <div className="absolute top-1/2 left-1/3 w-72 h-72 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full blur-3xl opacity-15" />
+    <section id="hero" className="relative overflow-hidden py-20 sm:py-32 lg:py-40" suppressHydrationWarning>
+      <div className="absolute inset-0 -z-10" suppressHydrationWarning>
+        <div className="absolute top-20 right-10 w-96 h-96 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full blur-3xl opacity-15" suppressHydrationWarning />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-purple-600 to-indigo-700 rounded-full blur-3xl opacity-20" suppressHydrationWarning />
+        <div className="absolute top-1/2 left-1/3 w-72 h-72 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full blur-3xl opacity-15" suppressHydrationWarning />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <div className="inline-block px-4 py-2 bg-primary/20 rounded-full border border-primary/40 backdrop-blur-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" suppressHydrationWarning>
+        <div className="grid lg:grid-cols-2 gap-12 items-center" suppressHydrationWarning>
+          <div className="space-y-8" suppressHydrationWarning>
+            <div className="space-y-4" suppressHydrationWarning>
+              <div className="inline-block px-4 py-2 bg-primary/20 rounded-full border border-primary/40 backdrop-blur-sm" suppressHydrationWarning>
                 <span className="text-sm font-medium text-primary">👁 Gru's Evil Genius Fund</span>
               </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-balance leading-tight">
@@ -35,9 +35,9 @@ export function Hero() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4" suppressHydrationWarning>
               {!isConnected ? (
-                <div className="bg-primary/10 border border-primary/30 text-foreground px-8 py-4 rounded-lg text-lg font-semibold">
+                <div className="bg-primary/10 border border-primary/30 text-foreground px-8 py-4 rounded-lg text-lg font-semibold" suppressHydrationWarning>
                   👆 Login as Investor or Founder to start
                 </div>
               ) : role === "founder" ? (
@@ -56,27 +56,27 @@ export function Hero() {
               </a>
             </div>
 
-            <div className="flex items-center gap-8 pt-4">
-              <div>
-                <div className="text-2xl font-bold text-primary">$2.5M+</div>
-                <div className="text-sm text-muted-foreground">Stolen... Funded</div>
+            <div className="flex items-center gap-8 pt-4" suppressHydrationWarning>
+              <div suppressHydrationWarning>
+                <div className="text-2xl font-bold text-primary" suppressHydrationWarning>$2.5M+</div>
+                <div className="text-sm text-muted-foreground" suppressHydrationWarning>Stolen... Funded</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-primary">1,200+</div>
-                <div className="text-sm text-muted-foreground">Evil Projects</div>
+              <div suppressHydrationWarning>
+                <div className="text-2xl font-bold text-primary" suppressHydrationWarning>1,200+</div>
+                <div className="text-sm text-muted-foreground" suppressHydrationWarning>Evil Projects</div>
               </div>
-              <div>
-                <div className="text-2xl font-bold text-primary">50K+</div>
-                <div className="text-sm text-muted-foreground">Minions</div>
+              <div suppressHydrationWarning>
+                <div className="text-2xl font-bold text-primary" suppressHydrationWarning>50K+</div>
+                <div className="text-sm text-muted-foreground" suppressHydrationWarning>Minions</div>
               </div>
             </div>
           </div>
 
-          <div className="relative h-96 lg:h-full">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-purple-600/20 to-indigo-700/20 rounded-2xl border border-primary/30 backdrop-blur-md" />
-            <div className="absolute inset-4 bg-gradient-to-br from-yellow-400/10 to-purple-600/10 rounded-xl border border-primary/20 flex items-center justify-center backdrop-blur-sm">
-              <div className="text-center space-y-4">
-                <div className="text-6xl">👁</div>
+          <div className="relative h-96 lg:h-full" suppressHydrationWarning>
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 via-purple-600/20 to-indigo-700/20 rounded-2xl border border-primary/30 backdrop-blur-md" suppressHydrationWarning />
+            <div className="absolute inset-4 bg-gradient-to-br from-yellow-400/10 to-purple-600/10 rounded-xl border border-primary/20 flex items-center justify-center backdrop-blur-sm" suppressHydrationWarning>
+              <div className="text-center space-y-4" suppressHydrationWarning>
+                <div className="text-6xl" suppressHydrationWarning>👁</div>
                 <p className="text-sm text-muted-foreground">Gru's Web3 Crowdfunding</p>
               </div>
             </div>

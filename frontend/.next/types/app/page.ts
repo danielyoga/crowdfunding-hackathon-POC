@@ -1,4 +1,4 @@
-// File: /Users/daniel.maydiputra/Dev/base jkt sep oct 2025/hackathon project/frontend/app/page.tsx
+// File: /Users/agung/Dev/Lisk-Builder-R3/crowdfunding-hackathon-POC/frontend/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -17,25 +17,25 @@ export default function Home() {
   const isConnected = !!role
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen" suppressHydrationWarning>
       <Header />
       
-      <main>
+      <main suppressHydrationWarning>
         {/* Hero Section */}
         <Hero />
         
         {/* Platform Stats */}
-        <section id="stats" className="py-12 bg-card/50 backdrop-blur-sm">
-          <div className="container mx-auto px-4">
+        <section id="stats" className="py-12 bg-card/50 backdrop-blur-sm" suppressHydrationWarning>
+          <div className="container mx-auto px-4" suppressHydrationWarning>
             <PlatformStats />
           </div>
         </section>
         
         {/* Campaign List */}
-        <section id="campaigns" className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-8">
-              <div>
+        <section id="campaigns" className="py-16" suppressHydrationWarning>
+          <div className="container mx-auto px-4" suppressHydrationWarning>
+            <div className="flex items-center justify-between mb-8" suppressHydrationWarning>
+              <div suppressHydrationWarning>
                 <h2 className="text-3xl font-bold text-foreground mb-2">
                   {role === "investor" ? "Browse Projects" : "Active Projects"}
                 </h2>
@@ -47,7 +47,7 @@ export default function Home() {
                 </p>
               </div>
               
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3" suppressHydrationWarning>
                 <Link
                   href="/browse"
                   className="bg-muted text-foreground px-6 py-3 rounded-lg hover:bg-muted/80 flex items-center gap-2 border"
@@ -77,9 +77,9 @@ export default function Home() {
         </section>
         
         {/* How It Works Section */}
-        <section id="how-it-works" className="py-16 bg-muted/50">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
+        <section id="how-it-works" className="py-16 bg-muted/50" suppressHydrationWarning>
+          <div className="container mx-auto px-4" suppressHydrationWarning>
+            <div className="text-center mb-12" suppressHydrationWarning>
               <h2 className="text-3xl font-bold text-foreground mb-4">
                 How It Works
               </h2>
@@ -88,10 +88,10 @@ export default function Home() {
               </p>
             </div>
             
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-8" suppressHydrationWarning>
               {/* Step 1 */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="text-center" suppressHydrationWarning>
+                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4" suppressHydrationWarning>
                   <span className="text-2xl font-bold text-primary">1</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Create Project</h3>
@@ -101,8 +101,8 @@ export default function Home() {
               </div>
               
               {/* Step 2 */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="text-center" suppressHydrationWarning>
+                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4" suppressHydrationWarning>
                   <span className="text-2xl font-bold text-primary">2</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Fund Projects</h3>
@@ -112,8 +112,8 @@ export default function Home() {
               </div>
               
               {/* Step 3 */}
-              <div className="text-center">
-                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="text-center" suppressHydrationWarning>
+                <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4" suppressHydrationWarning>
                   <span className="text-2xl font-bold text-primary">3</span>
                 </div>
                 <h3 className="text-xl font-semibold mb-2">Release Funds</h3>

@@ -6,26 +6,26 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title SimpleFactory
- * @notice Factory contract for creating simple crowdfunding campaigns
- * @dev Simplified factory with basic campaign creation
+ * @notice Factory contract for creating simple crowdfunding projects
+ * @dev Simplified factory with basic project creation
  */
 contract SimpleFactory is Ownable {
     
     // State variables
-    uint256 public campaignCount;
+    uint256 public projectCount;
     uint256 public creationFee = 0.01 ether; // Simple creation fee
     
     // Mappings
-    mapping(uint256 => address) public campaigns;
-    mapping(address => uint256[]) public founderCampaigns;
+    mapping(uint256 => address) public projects;
+    mapping(address => uint256[]) public founderProjects;
     
     // Arrays
-    address[] public allCampaigns;
+    address[] public allProjects;
     
     // Events
-    event CampaignCreated(
-        uint256 indexed campaignId,
-        address indexed campaignAddress,
+    event ProjectCreated(
+        uint256 indexed projectId,
+        address indexed projectAddress,
         address indexed founder,
         string title,
         uint256 fundingGoal
@@ -37,20 +37,20 @@ contract SimpleFactory is Ownable {
     // Custom errors
     error InsufficientCreationFee();
     error InvalidFundingGoal();
-    error CampaignCreationFailed();
+    error ProjectCreationFailed();
     
     constructor() Ownable(msg.sender) {}
     
     /**
-     * @notice Create a new campaign
+     * @notice Create a new project
      */
-    function createCampaign(
+    function createProject(
         string calldata title,
         string calldata description,
         uint256 fundingGoal,
         string[3] calldata milestoneDescriptions,
         uint256[3] calldata milestonePercentages
-    ) external payable returns (address campaignAddress) {
+    ) external payable returns (address projectAddress) {
         
         // Validate creation fee
         if (msg.value < creationFee) {
@@ -68,8 +68,8 @@ contract SimpleFactory is Ownable {
         }
         require(totalPercentage == 10000, "Milestone percentages must sum to 100%");
         
-        // Create new campaign
-        SimpleCampaign newCampaign = new SimpleCampaign(
+        // Create new project
+        SimpleProject newProject = new SimpleProject(
             msg.sender,
             title,
             description,
@@ -78,45 +78,45 @@ contract SimpleFactory is Ownable {
             milestonePercentages
         );
         
-        campaignAddress = address(newCampaign);
-        require(campaignAddress != address(0), "Campaign creation failed");
+        projectAddress = address(newProject);
+        require(projectAddress != address(0), "Project creation failed");
         
         // Update state
-        uint256 campaignId = campaignCount++;
-        campaigns[campaignId] = campaignAddress;
-        founderCampaigns[msg.sender].push(campaignId);
-        allCampaigns.push(campaignAddress);
+        uint256 projectId = projectCount++;
+        projects[projectId] = projectAddress;
+        founderProjects[msg.sender].push(projectId);
+        allProjects.push(projectAddress);
         
-        emit CampaignCreated(
-            campaignId,
-            campaignAddress,
+        emit ProjectCreated(
+            projectId,
+            projectAddress,
             msg.sender,
             title,
             fundingGoal
         );
         
-        return campaignAddress;
+        return projectAddress;
     }
     
     /**
-     * @notice Get campaign address by ID
+     * @notice Get project address by ID
      */
-    function getCampaign(uint256 campaignId) external view returns (address) {
-        return campaigns[campaignId];
+    function getProject(uint256 projectId) external view returns (address) {
+        return projects[projectId];
     }
     
     /**
-     * @notice Get all campaigns created by a founder
+     * @notice Get all projects created by a founder
      */
-    function getFounderCampaigns(address founder) external view returns (uint256[] memory) {
-        return founderCampaigns[founder];
+    function getFounderProjects(address founder) external view returns (uint256[] memory) {
+        return founderProjects[founder];
     }
     
     /**
-     * @notice Get all campaign addresses
+     * @notice Get all project addresses
      */
-    function getAllCampaigns() external view returns (address[] memory) {
-        return allCampaigns;
+    function getAllProjects() external view returns (address[] memory) {
+        return allProjects;
     }
     
     /**
@@ -142,10 +142,10 @@ contract SimpleFactory is Ownable {
      * @notice Get platform statistics
      */
     function getPlatformStats() external view returns (
-        uint256 totalCampaigns,
+        uint256 totalProjects,
         uint256 currentCreationFee
     ) {
-        return (campaignCount, creationFee);
+        return (projectCount, creationFee);
     }
     
     // Allow contract to receive ETH

@@ -7,26 +7,26 @@ import { CampaignCard } from "@/components/campaign-card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { CampaignCardData } from "@/lib/types"
-import { CampaignState } from "@/lib/contracts"
+import { ProjectCardData } from "@/lib/types"
+import { ProjectState } from "@/lib/contracts"
 import { Search, Filter, Sparkles } from "lucide-react"
 
 export default function BrowsePage() {
-  const [campaigns, setCampaigns] = useState<CampaignCardData[]>([])
-  const [filteredCampaigns, setFilteredCampaigns] = useState<CampaignCardData[]>([])
+  const [projects, setProjects] = useState<ProjectCardData[]>([])
+  const [filteredProjects, setFilteredProjects] = useState<ProjectCardData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [filterState, setFilterState] = useState<"all" | CampaignState>("all")
+  const [filterState, setFilterState] = useState<"all" | ProjectState>("all")
 
-  // Fetch campaigns from localStorage
+  // Fetch projects from localStorage
   useEffect(() => {
-    fetchCampaigns()
+    fetchProjects()
   }, [])
 
-  // Filter campaigns when search or filter changes
+  // Filter projects when search or filter changes
   useEffect(() => {
-    let filtered = campaigns
+    let filtered = projects
 
     // Filter by state
     if (filterState !== "all") {
@@ -43,58 +43,79 @@ export default function BrowsePage() {
       )
     }
 
-    setFilteredCampaigns(filtered)
-  }, [campaigns, searchQuery, filterState])
+    setFilteredProjects(filtered)
+  }, [projects, searchQuery, filterState])
 
-  async function fetchCampaigns() {
+  async function fetchProjects() {
     try {
       setLoading(true)
       setError(null)
 
-      // Load campaigns from localStorage
+      // Fetch projects from blockchain
       if (typeof window !== "undefined") {
-        const storedCampaigns = localStorage.getItem('mockCampaigns')
+        const { ethers } = await import("ethers")
+        const { SIMPLE_FACTORY_ABI, SIMPLE_PROJECT_ABI, getFactoryAddress } = await import("@/lib/contracts")
         
-        if (!storedCampaigns) {
-          setCampaigns([])
-          setFilteredCampaigns([])
+        // Create provider
+        const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || "http://127.0.0.1:8545"
+        const provider = new ethers.JsonRpcProvider(rpcUrl)
+        
+        // Get factory contract
+        const factoryAddress = getFactoryAddress(31337) // localhost chain ID
+        const factory = new ethers.Contract(factoryAddress, SIMPLE_FACTORY_ABI, provider)
+        
+        // Get all project addresses
+        const allProjects = await factory.getAllProjects()
+        
+        if (allProjects.length === 0) {
+          setProjects([])
+          setFilteredProjects([])
           setLoading(false)
           return
         }
-
-        const campaigns = JSON.parse(storedCampaigns)
         
-        // Transform to CampaignCardData format
-        const campaignCards: CampaignCardData[] = campaigns.map((campaign: any) => {
-          const fundingGoal = parseFloat(campaign.fundingGoal)
-          const totalRaised = parseFloat(campaign.totalRaised)
-          const progress = fundingGoal > 0 ? (totalRaised / fundingGoal) * 100 : 0
-
-          const stateLabels = ["Funding", "Development", "Completed", "Failed"]
-          const state = campaign.state as CampaignState
-
-          return {
-            address: campaign.address,
-            title: campaign.title,
-            description: campaign.description,
-            founder: campaign.founder,
-            fundingGoal: campaign.fundingGoal,
-            totalRaised: campaign.totalRaised,
-            progress: Math.min(progress, 100),
-            state,
-            stateLabel: stateLabels[state],
-            currentMilestone: campaign.currentMilestone || 1,
-            totalMilestones: 3,
-            contributorsCount: campaign.contributors?.length || 0,
-            createdAt: new Date(campaign.createdAt)
+        // Fetch data for each project
+        const projectCards: ProjectCardData[] = []
+        
+        for (const projectAddress of allProjects) {
+          try {
+            const projectContract = new ethers.Contract(projectAddress, SIMPLE_PROJECT_ABI, provider)
+            const data = await projectContract.getProjectData()
+            const currentMilestone = Number(await projectContract.currentMilestone())
+            const contributors = await projectContract.getContributors()
+            
+            const fundingGoal = Number(ethers.formatEther(data.fundingGoal))
+            const totalRaised = Number(ethers.formatEther(data.totalRaised))
+            const progress = fundingGoal > 0 ? (totalRaised / fundingGoal) * 100 : 0
+            
+            const stateLabels = ["Funding", "Development", "Completed", "Failed"]
+            const state = Number(data.state) as ProjectState
+            
+            projectCards.push({
+              address: projectAddress,
+              title: data.title,
+              description: data.description,
+              founder: data.founder,
+              fundingGoal: fundingGoal.toFixed(4),
+              totalRaised: totalRaised.toFixed(4),
+              progress: Math.min(progress, 100),
+              state,
+              stateLabel: stateLabels[state],
+              currentMilestone,
+              totalMilestones: 3,
+              contributorsCount: contributors.length,
+              createdAt: new Date(Number(data.createdAt) * 1000)
+            })
+          } catch (err) {
+            console.error(`Error fetching project ${projectAddress}:`, err)
           }
-        })
-
+        }
+        
         // Sort by creation date (newest first)
-        campaignCards.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-
-        setCampaigns(campaignCards)
-        setFilteredCampaigns(campaignCards)
+        projectCards.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        
+        setProjects(projectCards)
+        setFilteredProjects(projectCards)
       }
     } catch (err) {
       console.error("Error fetching projects:", err)
@@ -138,7 +159,7 @@ export default function BrowsePage() {
               <div className="text-6xl">⚠️</div>
               <h2 className="text-2xl font-bold text-red-400">Error Loading Projects</h2>
               <p className="text-muted-foreground">{error}</p>
-              <Button onClick={fetchCampaigns} variant="outline">
+              <Button onClick={fetchProjects} variant="outline">
                 Try Again
               </Button>
             </div>
@@ -181,24 +202,24 @@ export default function BrowsePage() {
             {/* Stats */}
             <div className="flex flex-wrap gap-6">
               <div>
-                <div className="text-3xl font-bold text-primary">{campaigns.length}</div>
+                <div className="text-3xl font-bold text-primary">{projects.length}</div>
                 <div className="text-sm text-muted-foreground">Total Projects</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-primary">
-                  {campaigns.filter(c => c.state === CampaignState.Funding).length}
+                  {projects.filter(c => c.state === ProjectState.Funding).length}
                 </div>
                 <div className="text-sm text-muted-foreground">Funding</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-primary">
-                  {campaigns.filter(c => c.state === CampaignState.Development).length}
+                  {projects.filter(c => c.state === ProjectState.Development).length}
                 </div>
                 <div className="text-sm text-muted-foreground">In Development</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-primary">
-                  {campaigns.reduce((sum, c) => sum + parseFloat(c.totalRaised), 0).toFixed(2)} ETH
+                  {projects.reduce((sum, c) => sum + parseFloat(c.totalRaised), 0).toFixed(2)} ETH
                 </div>
                 <div className="text-sm text-muted-foreground">Total Raised</div>
               </div>
@@ -229,38 +250,38 @@ export default function BrowsePage() {
                 All
               </Button>
               <Button
-                variant={filterState === CampaignState.Funding ? "default" : "outline"}
+                variant={filterState === ProjectState.Funding ? "default" : "outline"}
                 size="sm"
-                onClick={() => setFilterState(CampaignState.Funding)}
+                onClick={() => setFilterState(ProjectState.Funding)}
               >
                 Funding
               </Button>
               <Button
-                variant={filterState === CampaignState.Development ? "default" : "outline"}
+                variant={filterState === ProjectState.Development ? "default" : "outline"}
                 size="sm"
-                onClick={() => setFilterState(CampaignState.Development)}
+                onClick={() => setFilterState(ProjectState.Development)}
               >
                 Development
               </Button>
               <Button
-                variant={filterState === CampaignState.Completed ? "default" : "outline"}
+                variant={filterState === ProjectState.Completed ? "default" : "outline"}
                 size="sm"
-                onClick={() => setFilterState(CampaignState.Completed)}
+                onClick={() => setFilterState(ProjectState.Completed)}
               >
                 Completed
               </Button>
               <Button
-                variant={filterState === CampaignState.Failed ? "default" : "outline"}
+                variant={filterState === ProjectState.Failed ? "default" : "outline"}
                 size="sm"
-                onClick={() => setFilterState(CampaignState.Failed)}
+                onClick={() => setFilterState(ProjectState.Failed)}
               >
                 Failed
               </Button>
             </div>
           </div>
 
-          {/* Campaign Grid */}
-          {filteredCampaigns.length === 0 ? (
+          {/* Project Grid */}
+          {filteredProjects.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-2xl font-bold mb-2">No Projects Found</h3>
@@ -284,14 +305,14 @@ export default function BrowsePage() {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredCampaigns.map((campaign) => (
-                  <CampaignCard key={campaign.address} campaign={campaign} />
+                {filteredProjects.map((project) => (
+                  <CampaignCard key={project.address} campaign={project} />
                 ))}
               </div>
 
               {/* Results count */}
               <div className="mt-8 text-center text-sm text-muted-foreground">
-                Showing {filteredCampaigns.length} of {campaigns.length} projects
+                Showing {filteredProjects.length} of {projects.length} projects
               </div>
             </>
           )}

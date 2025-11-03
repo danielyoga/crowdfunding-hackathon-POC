@@ -35,30 +35,30 @@ const config: HardhatUserConfig = {
       },
     },
     
-    baseSepolia: {
-      url: process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
+    liskSepolia: {
+      url: process.env.LISK_SEPOLIA_RPC_URL || "https://rpc.sepolia-api.lisk.com",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 84532,
+      chainId: 4202,
       gas: "auto",
       gasPrice: "auto",
       verify: {
         etherscan: {
-          apiUrl: "https://api-sepolia.basescan.org/api",
-          apiKey: process.env.BASESCAN_API_KEY || "",
+          apiUrl: "https://sepolia-blockscout.lisk.com/api",
+          apiKey: process.env.LISK_BLOCKSCOUT_API_KEY || "",
         },
       },
     },
     
-    base: {
-      url: process.env.BASE_MAINNET_RPC_URL || "https://mainnet.base.org",
+    lisk: {
+      url: process.env.LISK_MAINNET_RPC_URL || "https://rpc.api.lisk.com",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 8453,
+      chainId: 1135,
       gas: "auto",
       gasPrice: "auto",
       verify: {
         etherscan: {
-          apiUrl: "https://api.basescan.org/api",
-          apiKey: process.env.BASESCAN_API_KEY || "",
+          apiUrl: "https://blockscout.lisk.com/api",
+          apiKey: process.env.LISK_BLOCKSCOUT_API_KEY || "",
         },
       },
     },
@@ -71,24 +71,24 @@ const config: HardhatUserConfig = {
   
   etherscan: {
     apiKey: {
-      baseSepolia: process.env.BASESCAN_API_KEY || "",
-      base: process.env.BASESCAN_API_KEY || "",
+      liskSepolia: process.env.LISK_BLOCKSCOUT_API_KEY || "",
+      lisk: process.env.LISK_BLOCKSCOUT_API_KEY || "",
     },
     customChains: [
       {
-        network: "baseSepolia",
-        chainId: 84532,
+        network: "liskSepolia",
+        chainId: 4202,
         urls: {
-          apiURL: "https://api-sepolia.basescan.org/api",
-          browserURL: "https://sepolia.basescan.org",
+          apiURL: "https://sepolia-blockscout.lisk.com/api",
+          browserURL: "https://sepolia-blockscout.lisk.com",
         },
       },
       {
-        network: "base",
-        chainId: 8453,
+        network: "lisk",
+        chainId: 1135,
         urls: {
-          apiURL: "https://api.basescan.org/api",
-          browserURL: "https://basescan.org",
+          apiURL: "https://blockscout.lisk.com/api",
+          browserURL: "https://blockscout.lisk.com",
         },
       },
     ],

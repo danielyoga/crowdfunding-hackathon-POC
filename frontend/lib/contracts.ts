@@ -4,21 +4,21 @@
 export const SIMPLE_FACTORY_ABI = [
   {
     "inputs": [],
-    "name": "campaignCount",
+    "name": "projectCount",
     "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "getAllCampaigns",
+    "name": "getAllProjects",
     "outputs": [{ "internalType": "address[]", "name": "", "type": "address[]" }],
     "stateMutability": "view",
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "uint256", "name": "campaignId", "type": "uint256" }],
-    "name": "getCampaign",
+    "inputs": [{ "internalType": "uint256", "name": "projectId", "type": "uint256" }],
+    "name": "getProject",
     "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
     "stateMutability": "view",
     "type": "function"
@@ -38,14 +38,14 @@ export const SIMPLE_FACTORY_ABI = [
       { "internalType": "string[3]", "name": "milestoneDescriptions", "type": "string[3]" },
       { "internalType": "uint256[3]", "name": "milestonePercentages", "type": "uint256[3]" }
     ],
-    "name": "createCampaign",
-    "outputs": [{ "internalType": "address", "name": "campaignAddress", "type": "address" }],
+    "name": "createProject",
+    "outputs": [{ "internalType": "address", "name": "projectAddress", "type": "address" }],
     "stateMutability": "payable",
     "type": "function"
   },
   {
     "inputs": [{ "internalType": "address", "name": "founder", "type": "address" }],
-    "name": "getFounderCampaigns",
+    "name": "getFounderProjects",
     "outputs": [{ "internalType": "uint256[]", "name": "", "type": "uint256[]" }],
     "stateMutability": "view",
     "type": "function"
@@ -54,7 +54,7 @@ export const SIMPLE_FACTORY_ABI = [
     "inputs": [],
     "name": "getPlatformStats",
     "outputs": [
-      { "internalType": "uint256", "name": "totalCampaigns", "type": "uint256" },
+      { "internalType": "uint256", "name": "totalProjects", "type": "uint256" },
       { "internalType": "uint256", "name": "currentCreationFee", "type": "uint256" }
     ],
     "stateMutability": "view",
@@ -76,11 +76,11 @@ export const SIMPLE_FACTORY_ABI = [
   }
 ] as const;
 
-// SimpleCampaign ABI (complete for all functionality)
-export const SIMPLE_CAMPAIGN_ABI = [
+// SimpleProject ABI (complete for all functionality)
+export const SIMPLE_PROJECT_ABI = [
   {
     "inputs": [],
-    "name": "getCampaignData",
+    "name": "getProjectData",
     "outputs": [
       {
         "components": [
@@ -92,7 +92,7 @@ export const SIMPLE_CAMPAIGN_ABI = [
           { "internalType": "uint8", "name": "state", "type": "uint8" },
           { "internalType": "uint256", "name": "createdAt", "type": "uint256" }
         ],
-        "internalType": "struct SimpleCampaign.CampaignData",
+        "internalType": "struct SimpleProject.ProjectData",
         "name": "",
         "type": "tuple"
       }
@@ -108,9 +108,13 @@ export const SIMPLE_CAMPAIGN_ABI = [
         "components": [
           { "internalType": "string", "name": "description", "type": "string" },
           { "internalType": "uint256", "name": "releasePercentage", "type": "uint256" },
-          { "internalType": "uint8", "name": "state", "type": "uint8" }
+          { "internalType": "uint8", "name": "state", "type": "uint8" },
+          { "internalType": "uint256", "name": "submittedAt", "type": "uint256" },
+          { "internalType": "uint256", "name": "votingDeadline", "type": "uint256" },
+          { "internalType": "uint256", "name": "yesVotes", "type": "uint256" },
+          { "internalType": "uint256", "name": "noVotes", "type": "uint256" }
         ],
-        "internalType": "struct SimpleCampaign.Milestone",
+        "internalType": "struct SimpleProject.Milestone",
         "name": "",
         "type": "tuple"
       }
@@ -161,15 +165,63 @@ export const SIMPLE_CAMPAIGN_ABI = [
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "uint256", "name": "milestoneId", "type": "uint256" }],
-    "name": "completeMilestone",
+    "inputs": [
+      { "internalType": "uint256", "name": "milestoneId", "type": "uint256" },
+      { "internalType": "bool", "name": "voteYes", "type": "bool" }
+    ],
+    "name": "vote",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "inputs": [{ "internalType": "uint256", "name": "milestoneId", "type": "uint256" }],
+    "name": "finalizeVoting",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "milestoneId", "type": "uint256" },
+      { "internalType": "address", "name": "contributor", "type": "address" }
+    ],
+    "name": "getHasVoted",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "milestoneId", "type": "uint256" }],
+    "name": "getVotingStats",
+    "outputs": [
+      { "internalType": "uint256", "name": "yesVotes", "type": "uint256" },
+      { "internalType": "uint256", "name": "noVotes", "type": "uint256" },
+      { "internalType": "uint256", "name": "totalVotes", "type": "uint256" },
+      { "internalType": "uint256", "name": "yesPercentage", "type": "uint256" },
+      { "internalType": "uint256", "name": "votingDeadline", "type": "uint256" },
+      { "internalType": "bool", "name": "isActive", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
-    "name": "failCampaign",
+    "name": "VOTING_PERIOD",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "APPROVAL_THRESHOLD",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "failProject",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -183,24 +235,8 @@ export const SIMPLE_CAMPAIGN_ABI = [
   }
 ] as const;
 
-// Contract addresses (update these after deployment)
-export const CONTRACT_ADDRESSES = {
-  // Localhost/Hardhat
-  localhost: {
-    factoryAddress: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9", // Updated with deployed address
-  },
-  // Base Sepolia Testnet
-  baseSepolia: {
-    factoryAddress: "0x0000000000000000000000000000000000000000", // Update after deployment
-  },
-  // Base Mainnet
-  base: {
-    factoryAddress: "0x0000000000000000000000000000000000000000", // Update after deployment
-  }
-} as const;
-
-// Campaign state enum (matches smart contract)
-export enum CampaignState {
+// Project state enum (matches smart contract)
+export enum ProjectState {
   Funding = 0,
   Development = 1,
   Completed = 2,
@@ -221,9 +257,30 @@ export enum RiskProfile {
   Aggressive = 2    // 90/10 split
 }
 
-// Helper function to check if campaign is active (Funding or Development)
-export function isCampaignActive(state: CampaignState): boolean {
-  return state === CampaignState.Funding || state === CampaignState.Development;
+// Backward compatibility exports
+export const SIMPLE_CAMPAIGN_ABI = SIMPLE_PROJECT_ABI;
+export const CampaignState = ProjectState;
+export const isCampaignActive = isProjectActive;
+
+// Contract addresses (update these after deployment)
+export const CONTRACT_ADDRESSES = {
+  // Localhost/Hardhat
+  localhost: {
+    factoryAddress: "0x5FbDB2315678afecb367f032d93F642f64180aa3", // Updated with latest deployed address
+  },
+  // Lisk Sepolia Testnet
+  liskSepolia: {
+    factoryAddress: "0x0000000000000000000000000000000000000000", // Update after deployment
+  },
+  // Lisk Mainnet
+  lisk: {
+    factoryAddress: "0x0000000000000000000000000000000000000000", // Update after deployment
+  }
+} as const;
+
+// Helper function to check if project is active (Funding or Development)
+export function isProjectActive(state: ProjectState): boolean {
+  return state === ProjectState.Funding || state === ProjectState.Development;
 }
 
 // Risk profile splits (committed/reserve)
@@ -239,10 +296,10 @@ export function getFactoryAddress(chainId: number): string {
     case 31337: // Localhost
     case 1337:
       return CONTRACT_ADDRESSES.localhost.factoryAddress;
-    case 84532: // Base Sepolia
-      return CONTRACT_ADDRESSES.baseSepolia.factoryAddress;
-    case 8453: // Base Mainnet
-      return CONTRACT_ADDRESSES.base.factoryAddress;
+    case 4202: // Lisk Sepolia
+      return CONTRACT_ADDRESSES.liskSepolia.factoryAddress;
+    case 1135: // Lisk Mainnet
+      return CONTRACT_ADDRESSES.lisk.factoryAddress;
     default:
       return CONTRACT_ADDRESSES.localhost.factoryAddress;
   }
@@ -255,32 +312,32 @@ export const SUPPORTED_CHAINS = {
     name: "Localhost",
     rpcUrl: "http://127.0.0.1:8545",
     nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
+      name: "Indonesian Rupiah X",
+      symbol: "IDRX",
       decimals: 18
     }
   },
-  baseSepolia: {
-    id: 84532,
-    name: "Base Sepolia",
-    rpcUrl: "https://sepolia.base.org",
+  liskSepolia: {
+    id: 4202,
+    name: "Lisk Sepolia",
+    rpcUrl: "https://rpc.sepolia-api.lisk.com",
     nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
+      name: "Indonesian Rupiah X",
+      symbol: "IDRX",
       decimals: 18
     },
-    blockExplorer: "https://sepolia.basescan.org"
+    blockExplorer: "https://sepolia-blockscout.lisk.com"
   },
-  base: {
-    id: 8453,
-    name: "Base",
-    rpcUrl: "https://mainnet.base.org",
+  lisk: {
+    id: 1135,
+    name: "Lisk",
+    rpcUrl: "https://rpc.api.lisk.com",
     nativeCurrency: {
-      name: "Ether",
-      symbol: "ETH",
+      name: "Indonesian Rupiah X",
+      symbol: "IDRX",
       decimals: 18
     },
-    blockExplorer: "https://basescan.org"
+    blockExplorer: "https://blockscout.lisk.com"
   }
 } as const;
 
