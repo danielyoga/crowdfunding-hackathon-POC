@@ -12,42 +12,42 @@ async function main() {
   const factoryAddress = await factory.getAddress();
   console.log("SimpleFactory deployed to:", factoryAddress);
 
-  // Create a sample campaign
-  console.log("\nCreating sample campaign...");
+  // Create a sample project
+  console.log("\nCreating sample project...");
   
-  const milestoneDescriptions = [
+  const milestoneDescriptions: [string, string, string] = [
     "Prototype Development",
     "Beta Testing", 
     "Product Launch"
   ];
   
-  const milestonePercentages = [3000, 4000, 3000]; // 30%, 40%, 30%
+  const milestonePercentages: [number, number, number] = [3000, 4000, 3000]; // 30%, 40%, 30% = 100%
   
-  const tx = await factory.createCampaign(
+  const tx = await factory.createProject(
     "Lisk Crowdfunding Project",
     "A revolutionary crowdfunding platform built on Lisk L2",
-    ethers.parseEther("5"), // 5 ETH goal
+    ethers.parseEther("5"), // 5 IDRX goal
     milestoneDescriptions,
     milestonePercentages,
     { value: ethers.parseEther("0.01") } // Creation fee
   );
   
   const receipt = await tx.wait();
-  console.log("Sample campaign created!");
+  console.log("Sample project created!");
   
-  // Get the campaign address
-  const campaignAddress = await factory.campaigns(0);
-  console.log("Campaign address:", campaignAddress);
+  // Get the project address
+  const projectAddress = await factory.projects(0);
+  console.log("Project address:", projectAddress);
   
   console.log("\nDeployment completed successfully!");
   console.log("Factory Address:", factoryAddress);
-  console.log("Sample Campaign Address:", campaignAddress);
+  console.log("Sample Project Address:", projectAddress);
   
   // Save deployment info
   const deploymentInfo = {
     network: await ethers.provider.getNetwork(),
     factoryAddress,
-    campaignAddress,
+    projectAddress,
     deploymentTime: new Date().toISOString()
   };
   

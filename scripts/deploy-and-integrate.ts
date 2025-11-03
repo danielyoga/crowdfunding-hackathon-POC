@@ -42,39 +42,37 @@ async function main() {
   const factoryAddress = await factory.getAddress();
   console.log("✅ SimpleFactory deployed to:", factoryAddress);
 
-  // Create a sample campaign
-  console.log("\n🎯 Creating sample campaign...");
+  // Create a sample project
+  console.log("\n🎯 Creating sample project...");
   
-  const milestoneDescriptions = [
-    "Lisk Integration Development",
-    "Smart Contract Testing", 
-    "Frontend Integration",
-    "Security Audit",
+  const milestoneDescriptions: [string, string, string] = [
+    "Lisk Integration & Smart Contract Testing",
+    "Frontend Integration & Security Audit",
     "Mainnet Launch"
   ];
   
-  const milestonePercentages = [2000, 2000, 2000, 2000, 2000]; // 20% each
+  const milestonePercentages: [number, number, number] = [3000, 4000, 3000]; // 30%, 40%, 30% = 100%
   
-  const tx = await factory.createCampaign(
+  const tx = await factory.createProject(
     "Lisk Crowdfunding Platform",
     "A revolutionary crowdfunding platform built on Lisk L2 for the hackathon",
-    ethers.parseEther("2"), // 2 ETH goal
+    ethers.parseEther("2"), // 2 IDRX goal
     milestoneDescriptions,
     milestonePercentages,
     { value: ethers.parseEther("0.01") } // Creation fee
   );
   
   const receipt = await tx.wait();
-  console.log("✅ Sample campaign created!");
+  console.log("✅ Sample project created!");
   
-  // Get the campaign address
-  const campaignAddress = await factory.campaigns(0);
-  console.log("✅ Campaign address:", campaignAddress);
+  // Get the project address
+  const projectAddress = await factory.projects(0);
+  console.log("✅ Project address:", projectAddress);
   
   console.log("\n🎉 Deployment completed successfully!");
   console.log("=====================================");
   console.log("Factory Address:", factoryAddress);
-  console.log("Sample Campaign Address:", campaignAddress);
+  console.log("Sample Project Address:", projectAddress);
   console.log("Network: Lisk Sepolia (Chain ID: 4202)");
   console.log("Explorer: https://sepolia-blockscout.lisk.com");
   
@@ -99,7 +97,7 @@ NEXT_PUBLIC_SIMPLE_FACTORY_ADDRESS=${factoryAddress}`;
     network: "lisk-sepolia",
     chainId: 4202,
     factoryAddress,
-    campaignAddress,
+    projectAddress,
     deploymentTime: new Date().toISOString(),
     explorer: "https://sepolia-blockscout.lisk.com"
   };
@@ -116,7 +114,7 @@ NEXT_PUBLIC_SIMPLE_FACTORY_ADDRESS=${factoryAddress}`;
   console.log("\n🔗 Useful Links:");
   console.log("- Frontend: http://localhost:3000");
   console.log("- Factory Contract: https://sepolia-blockscout.lisk.com/address/" + factoryAddress);
-  console.log("- Campaign Contract: https://sepolia-blockscout.lisk.com/address/" + campaignAddress);
+  console.log("- Project Contract: https://sepolia-blockscout.lisk.com/address/" + projectAddress);
 }
 
 main()

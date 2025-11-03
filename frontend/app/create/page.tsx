@@ -485,21 +485,21 @@ export default function CreateProjectPage() {
                         size="sm"
                         onClick={() => applyPreset("standard")}
                       >
-                        Standard (10-20-25-25-20%)
+                        Standard (30%-40%-30%)
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => applyPreset("conservative")}
                       >
-                        Conservative (5-15-20-30-30%)
+                        Conservative (20%-30%-50%)
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => applyPreset("aggressive")}
                       >
-                        Aggressive (25-25-20-15-15%)
+                        Aggressive (50%-30%-20%)
                       </Button>
                     </div>
                   </div>

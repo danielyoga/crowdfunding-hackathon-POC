@@ -149,13 +149,13 @@ describe("SimpleFactory", function () {
       ).to.be.revertedWith("Invalid funding goal");
     });
 
-    it("Should prevent creation with invalid milestone percentages", async function () {
+    it("Should prevent creation with invalid milestone percentages (not 100%)", async function () {
       const invalidPercentages = [2000, 3000, 2000]; // Sums to 70%, not 100%
 
       await expect(
-        factory.connect(founder).createCampaign(
-          "Test Campaign",
-          "A test campaign",
+        factory.connect(founder).createProject(
+          "Test Project",
+          "A test project",
           FUNDING_GOAL,
           milestoneDescriptions,
           invalidPercentages,
@@ -168,15 +168,30 @@ describe("SimpleFactory", function () {
       const invalidPercentages = [0, 5000, 5000]; // First milestone is 0%
 
       await expect(
-        factory.connect(founder).createCampaign(
-          "Test Campaign",
-          "A test campaign",
+        factory.connect(founder).createProject(
+          "Test Project",
+          "A test project",
           FUNDING_GOAL,
           milestoneDescriptions,
           invalidPercentages,
           { value: CREATION_FEE }
         )
       ).to.be.revertedWith("Invalid milestone percentage");
+    });
+
+    it("Should prevent creation with excessive milestone percentages (over 100%)", async function () {
+      const invalidPercentages = [4000, 4000, 4000]; // Sums to 120%
+
+      await expect(
+        factory.connect(founder).createProject(
+          "Test Project",
+          "A test project",
+          FUNDING_GOAL,
+          milestoneDescriptions,
+          invalidPercentages,
+          { value: CREATION_FEE }
+        )
+      ).to.be.revertedWith("Milestone percentages must sum to 100%");
     });
 
     it("Should create campaign with exact funding goal limits", async function () {
