@@ -93,3 +93,9 @@ deployments/*.json
 tmp/
 temp/
 node_modules
+
+# Example projects (nested git repos)
+docs/lisk-projects/Kriptoin/
+docs/lisk-projects/LiskIDRXHackathon/
+docs/lisk-projects/NusanSwapV2/
+docs/lisk-projects/smart-contract-danantiri/

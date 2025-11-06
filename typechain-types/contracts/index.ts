@@ -3,4 +3,10 @@
 /* eslint-disable */
 import type * as simpleCampaignSol from "./SimpleCampaign.sol";
 export type { simpleCampaignSol };
+import type * as interfaces from "./interfaces";
+export type { interfaces };
+import type * as mocks from "./mocks";
+export type { mocks };
+export type { Campaign } from "./Campaign";
+export type { CampaignFactory } from "./CampaignFactory";
 export type { SimpleFactory } from "./SimpleFactory";

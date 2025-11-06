@@ -26,35 +26,28 @@ import type {
 export interface CampaignFactoryInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "MAX_DESCRIPTION_LENGTH"
-      | "MAX_FUNDING_GOAL"
-      | "MAX_MILESTONE_DEADLINE"
-      | "MAX_MILESTONE_PERCENTAGE"
-      | "MAX_PLATFORM_FEE"
-      | "MAX_TITLE_LENGTH"
-      | "MIN_FUNDING_GOAL"
-      | "MIN_MILESTONE_DEADLINE"
-      | "MIN_MILESTONE_PERCENTAGE"
-      | "MIN_TITLE_LENGTH"
-      | "activeCampaigns"
-      | "allCampaigns"
-      | "campaignCount"
-      | "campaignCreationFee"
+      | "MAX_DURATION"
+      | "MAX_GOAL"
+      | "MIN_GOAL"
+      | "accumulatedFees"
       | "campaigns"
+      | "campaignsByCreator"
       | "createCampaign"
-      | "founderCampaigns"
-      | "getAllActiveCampaigns"
+      | "getActiveCampaigns"
       | "getAllCampaigns"
-      | "getCampaign"
-      | "getFounderCampaigns"
-      | "getPlatformStats"
-      | "isCampaignActive"
-      | "markCampaignInactive"
+      | "getCampaignAt"
+      | "getCampaignCount"
+      | "getCampaignsByCreator"
+      | "getConfig"
+      | "getCreatorCampaignCount"
+      | "idrxToken"
       | "owner"
-      | "platformFeePercentage"
+      | "pauseCampaign"
+      | "platformFee"
       | "renounceOwnership"
+      | "totalCampaigns"
       | "transferOwnership"
-      | "updateCreationFee"
+      | "unpauseCampaign"
       | "updatePlatformFee"
       | "withdrawFees"
   ): FunctionFragment;
@@ -62,66 +55,21 @@ export interface CampaignFactoryInterface extends Interface {
   getEvent(
     nameOrSignatureOrTopic:
       | "CampaignCreated"
-      | "CreationFeeUpdated"
+      | "CampaignPaused"
+      | "CampaignUnpaused"
       | "FeesWithdrawn"
       | "OwnershipTransferred"
       | "PlatformFeeUpdated"
   ): EventFragment;
 
   encodeFunctionData(
-    functionFragment: "MAX_DESCRIPTION_LENGTH",
+    functionFragment: "MAX_DURATION",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "MAX_GOAL", values?: undefined): string;
+  encodeFunctionData(functionFragment: "MIN_GOAL", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "MAX_FUNDING_GOAL",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MAX_MILESTONE_DEADLINE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MAX_MILESTONE_PERCENTAGE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MAX_PLATFORM_FEE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MAX_TITLE_LENGTH",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MIN_FUNDING_GOAL",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MIN_MILESTONE_DEADLINE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MIN_MILESTONE_PERCENTAGE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MIN_TITLE_LENGTH",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "activeCampaigns",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "allCampaigns",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "campaignCount",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "campaignCreationFee",
+    functionFragment: "accumulatedFees",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -129,22 +77,15 @@ export interface CampaignFactoryInterface extends Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "createCampaign",
-    values: [
-      string,
-      string,
-      BigNumberish,
-      [string, string, string, string, string],
-      [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish],
-      [BigNumberish, BigNumberish, BigNumberish, BigNumberish, BigNumberish]
-    ]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "founderCampaigns",
+    functionFragment: "campaignsByCreator",
     values: [AddressLike, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getAllActiveCampaigns",
+    functionFragment: "createCampaign",
+    values: [string, string, BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getActiveCampaigns",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -152,28 +93,30 @@ export interface CampaignFactoryInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getCampaign",
+    functionFragment: "getCampaignAt",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getFounderCampaigns",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getPlatformStats",
+    functionFragment: "getCampaignCount",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "isCampaignActive",
+    functionFragment: "getCampaignsByCreator",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(functionFragment: "getConfig", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "markCampaignInactive",
+    functionFragment: "getCreatorCampaignCount",
     values: [AddressLike]
   ): string;
+  encodeFunctionData(functionFragment: "idrxToken", values?: undefined): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "platformFeePercentage",
+    functionFragment: "pauseCampaign",
+    values: [AddressLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "platformFee",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -181,12 +124,16 @@ export interface CampaignFactoryInterface extends Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
+    functionFragment: "totalCampaigns",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "updateCreationFee",
-    values: [BigNumberish]
+    functionFragment: "unpauseCampaign",
+    values: [AddressLike]
   ): string;
   encodeFunctionData(
     functionFragment: "updatePlatformFee",
@@ -194,76 +141,30 @@ export interface CampaignFactoryInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "withdrawFees",
-    values?: undefined
+    values: [AddressLike]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "MAX_DESCRIPTION_LENGTH",
+    functionFragment: "MAX_DURATION",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "MAX_GOAL", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "MIN_GOAL", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "MAX_FUNDING_GOAL",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MAX_MILESTONE_DEADLINE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MAX_MILESTONE_PERCENTAGE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MAX_PLATFORM_FEE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MAX_TITLE_LENGTH",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MIN_FUNDING_GOAL",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MIN_MILESTONE_DEADLINE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MIN_MILESTONE_PERCENTAGE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MIN_TITLE_LENGTH",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "activeCampaigns",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "allCampaigns",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "campaignCount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "campaignCreationFee",
+    functionFragment: "accumulatedFees",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "campaigns", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "campaignsByCreator",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "createCampaign",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "founderCampaigns",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getAllActiveCampaigns",
+    functionFragment: "getActiveCampaigns",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -271,28 +172,30 @@ export interface CampaignFactoryInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getCampaign",
+    functionFragment: "getCampaignAt",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getFounderCampaigns",
+    functionFragment: "getCampaignCount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPlatformStats",
+    functionFragment: "getCampaignsByCreator",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "getConfig", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "isCampaignActive",
+    functionFragment: "getCreatorCampaignCount",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "markCampaignInactive",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "idrxToken", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "platformFeePercentage",
+    functionFragment: "pauseCampaign",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "platformFee",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -300,11 +203,15 @@ export interface CampaignFactoryInterface extends Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "totalCampaigns",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "updateCreationFee",
+    functionFragment: "unpauseCampaign",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -319,28 +226,28 @@ export interface CampaignFactoryInterface extends Interface {
 
 export namespace CampaignCreatedEvent {
   export type InputTuple = [
-    campaignId: BigNumberish,
-    campaignAddress: AddressLike,
-    founder: AddressLike,
+    campaign: AddressLike,
+    creator: AddressLike,
     title: string,
-    fundingGoal: BigNumberish,
-    createdAt: BigNumberish
+    goal: BigNumberish,
+    deadline: BigNumberish,
+    campaignId: BigNumberish
   ];
   export type OutputTuple = [
-    campaignId: bigint,
-    campaignAddress: string,
-    founder: string,
+    campaign: string,
+    creator: string,
     title: string,
-    fundingGoal: bigint,
-    createdAt: bigint
+    goal: bigint,
+    deadline: bigint,
+    campaignId: bigint
   ];
   export interface OutputObject {
-    campaignId: bigint;
-    campaignAddress: string;
-    founder: string;
+    campaign: string;
+    creator: string;
     title: string;
-    fundingGoal: bigint;
-    createdAt: bigint;
+    goal: bigint;
+    deadline: bigint;
+    campaignId: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -348,12 +255,23 @@ export namespace CampaignCreatedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace CreationFeeUpdatedEvent {
-  export type InputTuple = [oldFee: BigNumberish, newFee: BigNumberish];
-  export type OutputTuple = [oldFee: bigint, newFee: bigint];
+export namespace CampaignPausedEvent {
+  export type InputTuple = [campaign: AddressLike];
+  export type OutputTuple = [campaign: string];
   export interface OutputObject {
-    oldFee: bigint;
-    newFee: bigint;
+    campaign: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace CampaignUnpausedEvent {
+  export type InputTuple = [campaign: AddressLike];
+  export type OutputTuple = [campaign: string];
+  export interface OutputObject {
+    campaign: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -362,10 +280,10 @@ export namespace CreationFeeUpdatedEvent {
 }
 
 export namespace FeesWithdrawnEvent {
-  export type InputTuple = [to: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [to: string, amount: bigint];
+  export type InputTuple = [recipient: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [recipient: string, amount: bigint];
   export interface OutputObject {
-    to: string;
+    recipient: string;
     amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
@@ -445,113 +363,83 @@ export interface CampaignFactory extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  MAX_DESCRIPTION_LENGTH: TypedContractMethod<[], [bigint], "view">;
+  MAX_DURATION: TypedContractMethod<[], [bigint], "view">;
 
-  MAX_FUNDING_GOAL: TypedContractMethod<[], [bigint], "view">;
+  MAX_GOAL: TypedContractMethod<[], [bigint], "view">;
 
-  MAX_MILESTONE_DEADLINE: TypedContractMethod<[], [bigint], "view">;
+  MIN_GOAL: TypedContractMethod<[], [bigint], "view">;
 
-  MAX_MILESTONE_PERCENTAGE: TypedContractMethod<[], [bigint], "view">;
-
-  MAX_PLATFORM_FEE: TypedContractMethod<[], [bigint], "view">;
-
-  MAX_TITLE_LENGTH: TypedContractMethod<[], [bigint], "view">;
-
-  MIN_FUNDING_GOAL: TypedContractMethod<[], [bigint], "view">;
-
-  MIN_MILESTONE_DEADLINE: TypedContractMethod<[], [bigint], "view">;
-
-  MIN_MILESTONE_PERCENTAGE: TypedContractMethod<[], [bigint], "view">;
-
-  MIN_TITLE_LENGTH: TypedContractMethod<[], [bigint], "view">;
-
-  activeCampaigns: TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
-
-  allCampaigns: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
-
-  campaignCount: TypedContractMethod<[], [bigint], "view">;
-
-  campaignCreationFee: TypedContractMethod<[], [bigint], "view">;
+  accumulatedFees: TypedContractMethod<[], [bigint], "view">;
 
   campaigns: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
 
-  createCampaign: TypedContractMethod<
-    [
-      title: string,
-      description: string,
-      fundingGoal: BigNumberish,
-      milestoneDescriptions: [string, string, string, string, string],
-      milestoneDeadlines: [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ],
-      milestonePercentages: [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ]
-    ],
-    [string],
-    "payable"
-  >;
-
-  founderCampaigns: TypedContractMethod<
+  campaignsByCreator: TypedContractMethod<
     [arg0: AddressLike, arg1: BigNumberish],
-    [bigint],
+    [string],
     "view"
   >;
 
-  getAllActiveCampaigns: TypedContractMethod<[], [string[]], "view">;
+  createCampaign: TypedContractMethod<
+    [
+      _title: string,
+      _description: string,
+      _goal: BigNumberish,
+      _duration: BigNumberish
+    ],
+    [string],
+    "nonpayable"
+  >;
+
+  getActiveCampaigns: TypedContractMethod<[], [string[]], "view">;
 
   getAllCampaigns: TypedContractMethod<[], [string[]], "view">;
 
-  getCampaign: TypedContractMethod<
-    [campaignId: BigNumberish],
-    [string],
+  getCampaignAt: TypedContractMethod<[_index: BigNumberish], [string], "view">;
+
+  getCampaignCount: TypedContractMethod<[], [bigint], "view">;
+
+  getCampaignsByCreator: TypedContractMethod<
+    [_creator: AddressLike],
+    [string[]],
     "view"
   >;
 
-  getFounderCampaigns: TypedContractMethod<
-    [founder: AddressLike],
-    [bigint[]],
-    "view"
-  >;
-
-  getPlatformStats: TypedContractMethod<
+  getConfig: TypedContractMethod<
     [],
     [
-      [bigint, bigint, bigint, bigint] & {
-        totalCampaigns: bigint;
-        activeCampaignsCount: bigint;
-        currentPlatformFee: bigint;
-        currentCreationFee: bigint;
+      [string, bigint, bigint, bigint, bigint, bigint] & {
+        _idrxToken: string;
+        _minGoal: bigint;
+        _maxGoal: bigint;
+        _maxDuration: bigint;
+        _platformFee: bigint;
+        _totalCampaigns: bigint;
       }
     ],
     "view"
   >;
 
-  isCampaignActive: TypedContractMethod<
-    [campaignAddress: AddressLike],
-    [boolean],
+  getCreatorCampaignCount: TypedContractMethod<
+    [_creator: AddressLike],
+    [bigint],
     "view"
   >;
 
-  markCampaignInactive: TypedContractMethod<
-    [campaignAddress: AddressLike],
+  idrxToken: TypedContractMethod<[], [string], "view">;
+
+  owner: TypedContractMethod<[], [string], "view">;
+
+  pauseCampaign: TypedContractMethod<
+    [_campaign: AddressLike],
     [void],
     "nonpayable"
   >;
 
-  owner: TypedContractMethod<[], [string], "view">;
-
-  platformFeePercentage: TypedContractMethod<[], [bigint], "view">;
+  platformFee: TypedContractMethod<[], [bigint], "view">;
 
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
+
+  totalCampaigns: TypedContractMethod<[], [bigint], "view">;
 
   transferOwnership: TypedContractMethod<
     [newOwner: AddressLike],
@@ -559,159 +447,126 @@ export interface CampaignFactory extends BaseContract {
     "nonpayable"
   >;
 
-  updateCreationFee: TypedContractMethod<
-    [newCreationFee: BigNumberish],
+  unpauseCampaign: TypedContractMethod<
+    [_campaign: AddressLike],
     [void],
     "nonpayable"
   >;
 
   updatePlatformFee: TypedContractMethod<
-    [newFeePercentage: BigNumberish],
+    [_newFee: BigNumberish],
     [void],
     "nonpayable"
   >;
 
-  withdrawFees: TypedContractMethod<[], [void], "nonpayable">;
+  withdrawFees: TypedContractMethod<
+    [_recipient: AddressLike],
+    [void],
+    "nonpayable"
+  >;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
 
   getFunction(
-    nameOrSignature: "MAX_DESCRIPTION_LENGTH"
+    nameOrSignature: "MAX_DURATION"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "MAX_FUNDING_GOAL"
+    nameOrSignature: "MAX_GOAL"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "MAX_MILESTONE_DEADLINE"
+    nameOrSignature: "MIN_GOAL"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "MAX_MILESTONE_PERCENTAGE"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "MAX_PLATFORM_FEE"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "MAX_TITLE_LENGTH"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "MIN_FUNDING_GOAL"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "MIN_MILESTONE_DEADLINE"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "MIN_MILESTONE_PERCENTAGE"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "MIN_TITLE_LENGTH"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "activeCampaigns"
-  ): TypedContractMethod<[arg0: AddressLike], [boolean], "view">;
-  getFunction(
-    nameOrSignature: "allCampaigns"
-  ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
-  getFunction(
-    nameOrSignature: "campaignCount"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "campaignCreationFee"
+    nameOrSignature: "accumulatedFees"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "campaigns"
   ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
   getFunction(
-    nameOrSignature: "createCampaign"
-  ): TypedContractMethod<
-    [
-      title: string,
-      description: string,
-      fundingGoal: BigNumberish,
-      milestoneDescriptions: [string, string, string, string, string],
-      milestoneDeadlines: [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ],
-      milestonePercentages: [
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish,
-        BigNumberish
-      ]
-    ],
-    [string],
-    "payable"
-  >;
-  getFunction(
-    nameOrSignature: "founderCampaigns"
+    nameOrSignature: "campaignsByCreator"
   ): TypedContractMethod<
     [arg0: AddressLike, arg1: BigNumberish],
-    [bigint],
+    [string],
     "view"
   >;
   getFunction(
-    nameOrSignature: "getAllActiveCampaigns"
+    nameOrSignature: "createCampaign"
+  ): TypedContractMethod<
+    [
+      _title: string,
+      _description: string,
+      _goal: BigNumberish,
+      _duration: BigNumberish
+    ],
+    [string],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "getActiveCampaigns"
   ): TypedContractMethod<[], [string[]], "view">;
   getFunction(
     nameOrSignature: "getAllCampaigns"
   ): TypedContractMethod<[], [string[]], "view">;
   getFunction(
-    nameOrSignature: "getCampaign"
-  ): TypedContractMethod<[campaignId: BigNumberish], [string], "view">;
+    nameOrSignature: "getCampaignAt"
+  ): TypedContractMethod<[_index: BigNumberish], [string], "view">;
   getFunction(
-    nameOrSignature: "getFounderCampaigns"
-  ): TypedContractMethod<[founder: AddressLike], [bigint[]], "view">;
+    nameOrSignature: "getCampaignCount"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "getPlatformStats"
+    nameOrSignature: "getCampaignsByCreator"
+  ): TypedContractMethod<[_creator: AddressLike], [string[]], "view">;
+  getFunction(
+    nameOrSignature: "getConfig"
   ): TypedContractMethod<
     [],
     [
-      [bigint, bigint, bigint, bigint] & {
-        totalCampaigns: bigint;
-        activeCampaignsCount: bigint;
-        currentPlatformFee: bigint;
-        currentCreationFee: bigint;
+      [string, bigint, bigint, bigint, bigint, bigint] & {
+        _idrxToken: string;
+        _minGoal: bigint;
+        _maxGoal: bigint;
+        _maxDuration: bigint;
+        _platformFee: bigint;
+        _totalCampaigns: bigint;
       }
     ],
     "view"
   >;
   getFunction(
-    nameOrSignature: "isCampaignActive"
-  ): TypedContractMethod<[campaignAddress: AddressLike], [boolean], "view">;
+    nameOrSignature: "getCreatorCampaignCount"
+  ): TypedContractMethod<[_creator: AddressLike], [bigint], "view">;
   getFunction(
-    nameOrSignature: "markCampaignInactive"
-  ): TypedContractMethod<[campaignAddress: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "idrxToken"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
     nameOrSignature: "owner"
   ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "platformFeePercentage"
+    nameOrSignature: "pauseCampaign"
+  ): TypedContractMethod<[_campaign: AddressLike], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "platformFee"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "renounceOwnership"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
+    nameOrSignature: "totalCampaigns"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
     nameOrSignature: "transferOwnership"
   ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "updateCreationFee"
-  ): TypedContractMethod<[newCreationFee: BigNumberish], [void], "nonpayable">;
+    nameOrSignature: "unpauseCampaign"
+  ): TypedContractMethod<[_campaign: AddressLike], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "updatePlatformFee"
-  ): TypedContractMethod<
-    [newFeePercentage: BigNumberish],
-    [void],
-    "nonpayable"
-  >;
+  ): TypedContractMethod<[_newFee: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "withdrawFees"
-  ): TypedContractMethod<[], [void], "nonpayable">;
+  ): TypedContractMethod<[_recipient: AddressLike], [void], "nonpayable">;
 
   getEvent(
     key: "CampaignCreated"
@@ -721,11 +576,18 @@ export interface CampaignFactory extends BaseContract {
     CampaignCreatedEvent.OutputObject
   >;
   getEvent(
-    key: "CreationFeeUpdated"
+    key: "CampaignPaused"
   ): TypedContractEvent<
-    CreationFeeUpdatedEvent.InputTuple,
-    CreationFeeUpdatedEvent.OutputTuple,
-    CreationFeeUpdatedEvent.OutputObject
+    CampaignPausedEvent.InputTuple,
+    CampaignPausedEvent.OutputTuple,
+    CampaignPausedEvent.OutputObject
+  >;
+  getEvent(
+    key: "CampaignUnpaused"
+  ): TypedContractEvent<
+    CampaignUnpausedEvent.InputTuple,
+    CampaignUnpausedEvent.OutputTuple,
+    CampaignUnpausedEvent.OutputObject
   >;
   getEvent(
     key: "FeesWithdrawn"
@@ -750,7 +612,7 @@ export interface CampaignFactory extends BaseContract {
   >;
 
   filters: {
-    "CampaignCreated(uint256,address,address,string,uint256,uint256)": TypedContractEvent<
+    "CampaignCreated(address,address,string,uint256,uint256,uint256)": TypedContractEvent<
       CampaignCreatedEvent.InputTuple,
       CampaignCreatedEvent.OutputTuple,
       CampaignCreatedEvent.OutputObject
@@ -761,15 +623,26 @@ export interface CampaignFactory extends BaseContract {
       CampaignCreatedEvent.OutputObject
     >;
 
-    "CreationFeeUpdated(uint256,uint256)": TypedContractEvent<
-      CreationFeeUpdatedEvent.InputTuple,
-      CreationFeeUpdatedEvent.OutputTuple,
-      CreationFeeUpdatedEvent.OutputObject
+    "CampaignPaused(address)": TypedContractEvent<
+      CampaignPausedEvent.InputTuple,
+      CampaignPausedEvent.OutputTuple,
+      CampaignPausedEvent.OutputObject
     >;
-    CreationFeeUpdated: TypedContractEvent<
-      CreationFeeUpdatedEvent.InputTuple,
-      CreationFeeUpdatedEvent.OutputTuple,
-      CreationFeeUpdatedEvent.OutputObject
+    CampaignPaused: TypedContractEvent<
+      CampaignPausedEvent.InputTuple,
+      CampaignPausedEvent.OutputTuple,
+      CampaignPausedEvent.OutputObject
+    >;
+
+    "CampaignUnpaused(address)": TypedContractEvent<
+      CampaignUnpausedEvent.InputTuple,
+      CampaignUnpausedEvent.OutputTuple,
+      CampaignUnpausedEvent.OutputObject
+    >;
+    CampaignUnpaused: TypedContractEvent<
+      CampaignUnpausedEvent.InputTuple,
+      CampaignUnpausedEvent.OutputTuple,
+      CampaignUnpausedEvent.OutputObject
     >;
 
     "FeesWithdrawn(address,uint256)": TypedContractEvent<

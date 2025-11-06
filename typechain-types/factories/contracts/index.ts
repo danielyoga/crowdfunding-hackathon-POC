@@ -2,4 +2,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as simpleCampaignSol from "./SimpleCampaign.sol";
+export * as interfaces from "./interfaces";
+export * as mocks from "./mocks";
+export { Campaign__factory } from "./Campaign__factory";
+export { CampaignFactory__factory } from "./CampaignFactory__factory";
 export { SimpleFactory__factory } from "./SimpleFactory__factory";

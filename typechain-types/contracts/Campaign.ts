@@ -23,488 +23,198 @@ import type {
   TypedContractMethod,
 } from "../common";
 
-export declare namespace Campaign {
-  export type CampaignDataStruct = {
-    title: string;
-    description: string;
-    founder: AddressLike;
-    fundingGoal: BigNumberish;
-    totalRaised: BigNumberish;
-    totalCommittedPool: BigNumberish;
-    totalReservePool: BigNumberish;
-    currentMilestone: BigNumberish;
-    state: BigNumberish;
-    createdAt: BigNumberish;
-    platformFeePercentage: BigNumberish;
-  };
-
-  export type CampaignDataStructOutput = [
-    title: string,
-    description: string,
-    founder: string,
-    fundingGoal: bigint,
-    totalRaised: bigint,
-    totalCommittedPool: bigint,
-    totalReservePool: bigint,
-    currentMilestone: bigint,
-    state: bigint,
-    createdAt: bigint,
-    platformFeePercentage: bigint
-  ] & {
-    title: string;
-    description: string;
-    founder: string;
-    fundingGoal: bigint;
-    totalRaised: bigint;
-    totalCommittedPool: bigint;
-    totalReservePool: bigint;
-    currentMilestone: bigint;
-    state: bigint;
-    createdAt: bigint;
-    platformFeePercentage: bigint;
-  };
-
-  export type FunderStruct = {
-    totalContribution: BigNumberish;
-    committedAmount: BigNumberish;
-    reserveAmount: BigNumberish;
-    riskProfile: BigNumberish;
-    hasVoted: [boolean, boolean, boolean, boolean, boolean];
-    missedVotes: BigNumberish;
-    isAutoYes: boolean;
-    hasRefunded: boolean;
-    fundedAt: BigNumberish;
-  };
-
-  export type FunderStructOutput = [
-    totalContribution: bigint,
-    committedAmount: bigint,
-    reserveAmount: bigint,
-    riskProfile: bigint,
-    hasVoted: [boolean, boolean, boolean, boolean, boolean],
-    missedVotes: bigint,
-    isAutoYes: boolean,
-    hasRefunded: boolean,
-    fundedAt: bigint
-  ] & {
-    totalContribution: bigint;
-    committedAmount: bigint;
-    reserveAmount: bigint;
-    riskProfile: bigint;
-    hasVoted: [boolean, boolean, boolean, boolean, boolean];
-    missedVotes: bigint;
-    isAutoYes: boolean;
-    hasRefunded: boolean;
-    fundedAt: bigint;
-  };
-
-  export type MilestoneStruct = {
-    description: string;
-    releasePercentage: BigNumberish;
-    deadline: BigNumberish;
-    state: BigNumberish;
-    votingDeadline: BigNumberish;
-    yesVotes: BigNumberish;
-    noVotes: BigNumberish;
-    totalVotingPower: BigNumberish;
-    evidenceIPFS: string;
-    rejectionCount: BigNumberish;
-    submittedAt: BigNumberish;
-  };
-
-  export type MilestoneStructOutput = [
-    description: string,
-    releasePercentage: bigint,
-    deadline: bigint,
-    state: bigint,
-    votingDeadline: bigint,
-    yesVotes: bigint,
-    noVotes: bigint,
-    totalVotingPower: bigint,
-    evidenceIPFS: string,
-    rejectionCount: bigint,
-    submittedAt: bigint
-  ] & {
-    description: string;
-    releasePercentage: bigint;
-    deadline: bigint;
-    state: bigint;
-    votingDeadline: bigint;
-    yesVotes: bigint;
-    noVotes: bigint;
-    totalVotingPower: bigint;
-    evidenceIPFS: string;
-    rejectionCount: bigint;
-    submittedAt: bigint;
-  };
-}
-
 export interface CampaignInterface extends Interface {
   getFunction(
     nameOrSignature:
-      | "APPROVAL_THRESHOLD"
-      | "MAX_WHALE_POWER"
       | "MIN_CONTRIBUTION"
-      | "VOTING_PERIOD"
-      | "campaignData"
-      | "claimRefund"
-      | "emergencyPause"
-      | "finalizeMilestone"
-      | "fund"
-      | "funders"
-      | "fundersList"
-      | "getCampaignData"
-      | "getCurrentMilestoneInfo"
-      | "getFunder"
-      | "getFundersList"
-      | "getMilestone"
-      | "getRefundAmount"
-      | "hasVotedOnMilestone"
-      | "milestones"
-      | "owner"
+      | "cancel"
+      | "checkState"
+      | "contribute"
+      | "contributions"
+      | "contributors"
+      | "creator"
+      | "deadline"
+      | "description"
+      | "factory"
+      | "getCampaignInfo"
+      | "getContributorCount"
+      | "getContributors"
+      | "getProgress"
+      | "getTimeRemaining"
+      | "goal"
+      | "idrxToken"
+      | "isDeadlinePassed"
+      | "isGoalReached"
       | "pause"
       | "paused"
-      | "renounceOwnership"
-      | "submitMilestone"
-      | "transferOwnership"
+      | "refund"
+      | "state"
+      | "title"
+      | "totalRaised"
       | "unpause"
-      | "vote"
+      | "withdraw"
   ): FunctionFragment;
 
   getEvent(
     nameOrSignatureOrTopic:
-      | "CampaignStateChanged"
-      | "FundReceived"
-      | "FundsReleased"
-      | "MilestoneCompleted"
-      | "MilestoneRejected"
-      | "MilestoneSubmitted"
-      | "OwnershipTransferred"
+      | "Contributed"
       | "Paused"
-      | "RefundClaimed"
-      | "ReservesReleased"
+      | "Refunded"
+      | "StateChanged"
       | "Unpaused"
-      | "VoteCast"
+      | "Withdrawn"
   ): EventFragment;
 
   encodeFunctionData(
-    functionFragment: "APPROVAL_THRESHOLD",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "MAX_WHALE_POWER",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "MIN_CONTRIBUTION",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "cancel", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "VOTING_PERIOD",
+    functionFragment: "checkState",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "campaignData",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "claimRefund",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "emergencyPause",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "finalizeMilestone",
+    functionFragment: "contribute",
     values: [BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "fund", values: [BigNumberish]): string;
   encodeFunctionData(
-    functionFragment: "funders",
+    functionFragment: "contributions",
     values: [AddressLike]
   ): string;
   encodeFunctionData(
-    functionFragment: "fundersList",
+    functionFragment: "contributors",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "creator", values?: undefined): string;
+  encodeFunctionData(functionFragment: "deadline", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "getCampaignData",
+    functionFragment: "description",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "factory", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "getCampaignInfo",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getCurrentMilestoneInfo",
+    functionFragment: "getContributorCount",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getFunder",
-    values: [AddressLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getFundersList",
+    functionFragment: "getContributors",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getMilestone",
-    values: [BigNumberish]
+    functionFragment: "getProgress",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getRefundAmount",
-    values: [AddressLike]
+    functionFragment: "getTimeRemaining",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "goal", values?: undefined): string;
+  encodeFunctionData(functionFragment: "idrxToken", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "isDeadlinePassed",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "hasVotedOnMilestone",
-    values: [BigNumberish, AddressLike]
+    functionFragment: "isGoalReached",
+    values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "milestones",
-    values: [BigNumberish]
-  ): string;
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(functionFragment: "pause", values?: undefined): string;
   encodeFunctionData(functionFragment: "paused", values?: undefined): string;
+  encodeFunctionData(functionFragment: "refund", values?: undefined): string;
+  encodeFunctionData(functionFragment: "state", values?: undefined): string;
+  encodeFunctionData(functionFragment: "title", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "renounceOwnership",
+    functionFragment: "totalRaised",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "submitMilestone",
-    values: [BigNumberish, string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [AddressLike]
-  ): string;
   encodeFunctionData(functionFragment: "unpause", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "vote",
-    values: [BigNumberish, boolean]
-  ): string;
+  encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
-  decodeFunctionResult(
-    functionFragment: "APPROVAL_THRESHOLD",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "MAX_WHALE_POWER",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "MIN_CONTRIBUTION",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "cancel", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "checkState", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "contribute", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "VOTING_PERIOD",
+    functionFragment: "contributions",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "campaignData",
+    functionFragment: "contributors",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "creator", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "deadline", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "description",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getCampaignInfo",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "claimRefund",
+    functionFragment: "getContributorCount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "emergencyPause",
+    functionFragment: "getContributors",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "finalizeMilestone",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "fund", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "funders", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "fundersList",
+    functionFragment: "getProgress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getCampaignData",
+    functionFragment: "getTimeRemaining",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "goal", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "idrxToken", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "isDeadlinePassed",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getCurrentMilestoneInfo",
+    functionFragment: "isGoalReached",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "getFunder", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getFundersList",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getMilestone",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "getRefundAmount",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "hasVotedOnMilestone",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "milestones", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "pause", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "paused", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "refund", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "state", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "title", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "submitMilestone",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
+    functionFragment: "totalRaised",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "unpause", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "vote", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 }
 
-export namespace CampaignStateChangedEvent {
-  export type InputTuple = [oldState: BigNumberish, newState: BigNumberish];
-  export type OutputTuple = [oldState: bigint, newState: bigint];
-  export interface OutputObject {
-    oldState: bigint;
-    newState: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace FundReceivedEvent {
+export namespace ContributedEvent {
   export type InputTuple = [
-    funder: AddressLike,
+    contributor: AddressLike,
     amount: BigNumberish,
-    riskProfile: BigNumberish,
-    committedAmount: BigNumberish,
-    reserveAmount: BigNumberish
+    totalRaised: BigNumberish
   ];
   export type OutputTuple = [
-    funder: string,
+    contributor: string,
     amount: bigint,
-    riskProfile: bigint,
-    committedAmount: bigint,
-    reserveAmount: bigint
+    totalRaised: bigint
   ];
   export interface OutputObject {
-    funder: string;
+    contributor: string;
     amount: bigint;
-    riskProfile: bigint;
-    committedAmount: bigint;
-    reserveAmount: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace FundsReleasedEvent {
-  export type InputTuple = [
-    milestoneId: BigNumberish,
-    amount: BigNumberish,
-    founder: AddressLike
-  ];
-  export type OutputTuple = [
-    milestoneId: bigint,
-    amount: bigint,
-    founder: string
-  ];
-  export interface OutputObject {
-    milestoneId: bigint;
-    amount: bigint;
-    founder: string;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace MilestoneCompletedEvent {
-  export type InputTuple = [
-    milestoneId: BigNumberish,
-    fundsReleased: BigNumberish,
-    yesVotes: BigNumberish,
-    noVotes: BigNumberish
-  ];
-  export type OutputTuple = [
-    milestoneId: bigint,
-    fundsReleased: bigint,
-    yesVotes: bigint,
-    noVotes: bigint
-  ];
-  export interface OutputObject {
-    milestoneId: bigint;
-    fundsReleased: bigint;
-    yesVotes: bigint;
-    noVotes: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace MilestoneRejectedEvent {
-  export type InputTuple = [
-    milestoneId: BigNumberish,
-    yesVotes: BigNumberish,
-    noVotes: BigNumberish,
-    rejectionCount: BigNumberish
-  ];
-  export type OutputTuple = [
-    milestoneId: bigint,
-    yesVotes: bigint,
-    noVotes: bigint,
-    rejectionCount: bigint
-  ];
-  export interface OutputObject {
-    milestoneId: bigint;
-    yesVotes: bigint;
-    noVotes: bigint;
-    rejectionCount: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace MilestoneSubmittedEvent {
-  export type InputTuple = [
-    milestoneId: BigNumberish,
-    evidenceIPFS: string,
-    votingDeadline: BigNumberish
-  ];
-  export type OutputTuple = [
-    milestoneId: bigint,
-    evidenceIPFS: string,
-    votingDeadline: bigint
-  ];
-  export interface OutputObject {
-    milestoneId: bigint;
-    evidenceIPFS: string;
-    votingDeadline: bigint;
-  }
-  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
-  export type Filter = TypedDeferredTopicFilter<Event>;
-  export type Log = TypedEventLog<Event>;
-  export type LogDescription = TypedLogDescription<Event>;
-}
-
-export namespace OwnershipTransferredEvent {
-  export type InputTuple = [previousOwner: AddressLike, newOwner: AddressLike];
-  export type OutputTuple = [previousOwner: string, newOwner: string];
-  export interface OutputObject {
-    previousOwner: string;
-    newOwner: string;
+    totalRaised: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -524,21 +234,12 @@ export namespace PausedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace RefundClaimedEvent {
-  export type InputTuple = [
-    funder: AddressLike,
-    refundAmount: BigNumberish,
-    originalContribution: BigNumberish
-  ];
-  export type OutputTuple = [
-    funder: string,
-    refundAmount: bigint,
-    originalContribution: bigint
-  ];
+export namespace RefundedEvent {
+  export type InputTuple = [contributor: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [contributor: string, amount: bigint];
   export interface OutputObject {
-    funder: string;
-    refundAmount: bigint;
-    originalContribution: bigint;
+    contributor: string;
+    amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -546,12 +247,12 @@ export namespace RefundClaimedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace ReservesReleasedEvent {
-  export type InputTuple = [founder: AddressLike, amount: BigNumberish];
-  export type OutputTuple = [founder: string, amount: bigint];
+export namespace StateChangedEvent {
+  export type InputTuple = [oldState: BigNumberish, newState: BigNumberish];
+  export type OutputTuple = [oldState: bigint, newState: bigint];
   export interface OutputObject {
-    founder: string;
-    amount: bigint;
+    oldState: bigint;
+    newState: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -571,24 +272,12 @@ export namespace UnpausedEvent {
   export type LogDescription = TypedLogDescription<Event>;
 }
 
-export namespace VoteCastEvent {
-  export type InputTuple = [
-    milestoneId: BigNumberish,
-    voter: AddressLike,
-    support: boolean,
-    votingPower: BigNumberish
-  ];
-  export type OutputTuple = [
-    milestoneId: bigint,
-    voter: string,
-    support: boolean,
-    votingPower: bigint
-  ];
+export namespace WithdrawnEvent {
+  export type InputTuple = [creator: AddressLike, amount: BigNumberish];
+  export type OutputTuple = [creator: string, amount: bigint];
   export interface OutputObject {
-    milestoneId: bigint;
-    voter: string;
-    support: boolean;
-    votingPower: bigint;
+    creator: string;
+    amount: bigint;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -641,346 +330,155 @@ export interface Campaign extends BaseContract {
     event?: TCEvent
   ): Promise<this>;
 
-  APPROVAL_THRESHOLD: TypedContractMethod<[], [bigint], "view">;
-
-  MAX_WHALE_POWER: TypedContractMethod<[], [bigint], "view">;
-
   MIN_CONTRIBUTION: TypedContractMethod<[], [bigint], "view">;
 
-  VOTING_PERIOD: TypedContractMethod<[], [bigint], "view">;
+  cancel: TypedContractMethod<[], [void], "nonpayable">;
 
-  campaignData: TypedContractMethod<
-    [],
-    [
-      [
-        string,
-        string,
-        string,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint
-      ] & {
-        title: string;
-        description: string;
-        founder: string;
-        fundingGoal: bigint;
-        totalRaised: bigint;
-        totalCommittedPool: bigint;
-        totalReservePool: bigint;
-        currentMilestone: bigint;
-        state: bigint;
-        createdAt: bigint;
-        platformFeePercentage: bigint;
-      }
-    ],
-    "view"
-  >;
+  checkState: TypedContractMethod<[], [void], "nonpayable">;
 
-  claimRefund: TypedContractMethod<[], [void], "nonpayable">;
-
-  emergencyPause: TypedContractMethod<[], [void], "nonpayable">;
-
-  finalizeMilestone: TypedContractMethod<
-    [milestoneId: BigNumberish],
+  contribute: TypedContractMethod<
+    [_amount: BigNumberish],
     [void],
     "nonpayable"
   >;
 
-  fund: TypedContractMethod<[riskProfile: BigNumberish], [void], "payable">;
+  contributions: TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
 
-  funders: TypedContractMethod<
-    [arg0: AddressLike],
-    [
-      [bigint, bigint, bigint, bigint, bigint, boolean, boolean, bigint] & {
-        totalContribution: bigint;
-        committedAmount: bigint;
-        reserveAmount: bigint;
-        riskProfile: bigint;
-        missedVotes: bigint;
-        isAutoYes: boolean;
-        hasRefunded: boolean;
-        fundedAt: bigint;
-      }
-    ],
-    "view"
-  >;
+  contributors: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
 
-  fundersList: TypedContractMethod<[arg0: BigNumberish], [string], "view">;
+  creator: TypedContractMethod<[], [string], "view">;
 
-  getCampaignData: TypedContractMethod<
-    [],
-    [Campaign.CampaignDataStructOutput],
-    "view"
-  >;
+  deadline: TypedContractMethod<[], [bigint], "view">;
 
-  getCurrentMilestoneInfo: TypedContractMethod<
+  description: TypedContractMethod<[], [string], "view">;
+
+  factory: TypedContractMethod<[], [string], "view">;
+
+  getCampaignInfo: TypedContractMethod<
     [],
     [
-      [bigint, string, bigint, bigint, bigint] & {
-        milestoneId: bigint;
-        description: string;
-        state: bigint;
-        deadline: bigint;
-        votingDeadline: bigint;
+      [string, string, string, bigint, bigint, bigint, bigint, bigint] & {
+        _title: string;
+        _description: string;
+        _creator: string;
+        _goal: bigint;
+        _deadline: bigint;
+        _totalRaised: bigint;
+        _state: bigint;
+        _contributorCount: bigint;
       }
     ],
     "view"
   >;
 
-  getFunder: TypedContractMethod<
-    [funderAddress: AddressLike],
-    [Campaign.FunderStructOutput],
-    "view"
-  >;
+  getContributorCount: TypedContractMethod<[], [bigint], "view">;
 
-  getFundersList: TypedContractMethod<[], [string[]], "view">;
+  getContributors: TypedContractMethod<[], [string[]], "view">;
 
-  getMilestone: TypedContractMethod<
-    [milestoneId: BigNumberish],
-    [Campaign.MilestoneStructOutput],
-    "view"
-  >;
+  getProgress: TypedContractMethod<[], [bigint], "view">;
 
-  getRefundAmount: TypedContractMethod<
-    [funderAddress: AddressLike],
-    [bigint],
-    "view"
-  >;
+  getTimeRemaining: TypedContractMethod<[], [bigint], "view">;
 
-  hasVotedOnMilestone: TypedContractMethod<
-    [arg0: BigNumberish, arg1: AddressLike],
-    [boolean],
-    "view"
-  >;
+  goal: TypedContractMethod<[], [bigint], "view">;
 
-  milestones: TypedContractMethod<
-    [arg0: BigNumberish],
-    [
-      [
-        string,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        string,
-        bigint,
-        bigint
-      ] & {
-        description: string;
-        releasePercentage: bigint;
-        deadline: bigint;
-        state: bigint;
-        votingDeadline: bigint;
-        yesVotes: bigint;
-        noVotes: bigint;
-        totalVotingPower: bigint;
-        evidenceIPFS: string;
-        rejectionCount: bigint;
-        submittedAt: bigint;
-      }
-    ],
-    "view"
-  >;
+  idrxToken: TypedContractMethod<[], [string], "view">;
 
-  owner: TypedContractMethod<[], [string], "view">;
+  isDeadlinePassed: TypedContractMethod<[], [boolean], "view">;
+
+  isGoalReached: TypedContractMethod<[], [boolean], "view">;
 
   pause: TypedContractMethod<[], [void], "nonpayable">;
 
   paused: TypedContractMethod<[], [boolean], "view">;
 
-  renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
+  refund: TypedContractMethod<[], [void], "nonpayable">;
 
-  submitMilestone: TypedContractMethod<
-    [milestoneId: BigNumberish, evidenceIPFS: string],
-    [void],
-    "nonpayable"
-  >;
+  state: TypedContractMethod<[], [bigint], "view">;
 
-  transferOwnership: TypedContractMethod<
-    [newOwner: AddressLike],
-    [void],
-    "nonpayable"
-  >;
+  title: TypedContractMethod<[], [string], "view">;
+
+  totalRaised: TypedContractMethod<[], [bigint], "view">;
 
   unpause: TypedContractMethod<[], [void], "nonpayable">;
 
-  vote: TypedContractMethod<
-    [milestoneId: BigNumberish, support: boolean],
-    [void],
-    "nonpayable"
-  >;
+  withdraw: TypedContractMethod<[], [void], "nonpayable">;
 
   getFunction<T extends ContractMethod = ContractMethod>(
     key: string | FunctionFragment
   ): T;
 
   getFunction(
-    nameOrSignature: "APPROVAL_THRESHOLD"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "MAX_WHALE_POWER"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
     nameOrSignature: "MIN_CONTRIBUTION"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "VOTING_PERIOD"
-  ): TypedContractMethod<[], [bigint], "view">;
-  getFunction(
-    nameOrSignature: "campaignData"
-  ): TypedContractMethod<
-    [],
-    [
-      [
-        string,
-        string,
-        string,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint
-      ] & {
-        title: string;
-        description: string;
-        founder: string;
-        fundingGoal: bigint;
-        totalRaised: bigint;
-        totalCommittedPool: bigint;
-        totalReservePool: bigint;
-        currentMilestone: bigint;
-        state: bigint;
-        createdAt: bigint;
-        platformFeePercentage: bigint;
-      }
-    ],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "claimRefund"
+    nameOrSignature: "cancel"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "emergencyPause"
+    nameOrSignature: "checkState"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "finalizeMilestone"
-  ): TypedContractMethod<[milestoneId: BigNumberish], [void], "nonpayable">;
+    nameOrSignature: "contribute"
+  ): TypedContractMethod<[_amount: BigNumberish], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "fund"
-  ): TypedContractMethod<[riskProfile: BigNumberish], [void], "payable">;
+    nameOrSignature: "contributions"
+  ): TypedContractMethod<[arg0: AddressLike], [bigint], "view">;
   getFunction(
-    nameOrSignature: "funders"
-  ): TypedContractMethod<
-    [arg0: AddressLike],
-    [
-      [bigint, bigint, bigint, bigint, bigint, boolean, boolean, bigint] & {
-        totalContribution: bigint;
-        committedAmount: bigint;
-        reserveAmount: bigint;
-        riskProfile: bigint;
-        missedVotes: bigint;
-        isAutoYes: boolean;
-        hasRefunded: boolean;
-        fundedAt: bigint;
-      }
-    ],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "fundersList"
+    nameOrSignature: "contributors"
   ): TypedContractMethod<[arg0: BigNumberish], [string], "view">;
   getFunction(
-    nameOrSignature: "getCampaignData"
-  ): TypedContractMethod<[], [Campaign.CampaignDataStructOutput], "view">;
+    nameOrSignature: "creator"
+  ): TypedContractMethod<[], [string], "view">;
   getFunction(
-    nameOrSignature: "getCurrentMilestoneInfo"
+    nameOrSignature: "deadline"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "description"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "factory"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "getCampaignInfo"
   ): TypedContractMethod<
     [],
     [
-      [bigint, string, bigint, bigint, bigint] & {
-        milestoneId: bigint;
-        description: string;
-        state: bigint;
-        deadline: bigint;
-        votingDeadline: bigint;
+      [string, string, string, bigint, bigint, bigint, bigint, bigint] & {
+        _title: string;
+        _description: string;
+        _creator: string;
+        _goal: bigint;
+        _deadline: bigint;
+        _totalRaised: bigint;
+        _state: bigint;
+        _contributorCount: bigint;
       }
     ],
     "view"
   >;
   getFunction(
-    nameOrSignature: "getFunder"
-  ): TypedContractMethod<
-    [funderAddress: AddressLike],
-    [Campaign.FunderStructOutput],
-    "view"
-  >;
+    nameOrSignature: "getContributorCount"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "getFundersList"
+    nameOrSignature: "getContributors"
   ): TypedContractMethod<[], [string[]], "view">;
   getFunction(
-    nameOrSignature: "getMilestone"
-  ): TypedContractMethod<
-    [milestoneId: BigNumberish],
-    [Campaign.MilestoneStructOutput],
-    "view"
-  >;
+    nameOrSignature: "getProgress"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "getRefundAmount"
-  ): TypedContractMethod<[funderAddress: AddressLike], [bigint], "view">;
+    nameOrSignature: "getTimeRemaining"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "hasVotedOnMilestone"
-  ): TypedContractMethod<
-    [arg0: BigNumberish, arg1: AddressLike],
-    [boolean],
-    "view"
-  >;
+    nameOrSignature: "goal"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "milestones"
-  ): TypedContractMethod<
-    [arg0: BigNumberish],
-    [
-      [
-        string,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        bigint,
-        string,
-        bigint,
-        bigint
-      ] & {
-        description: string;
-        releasePercentage: bigint;
-        deadline: bigint;
-        state: bigint;
-        votingDeadline: bigint;
-        yesVotes: bigint;
-        noVotes: bigint;
-        totalVotingPower: bigint;
-        evidenceIPFS: string;
-        rejectionCount: bigint;
-        submittedAt: bigint;
-      }
-    ],
-    "view"
-  >;
-  getFunction(
-    nameOrSignature: "owner"
+    nameOrSignature: "idrxToken"
   ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "isDeadlinePassed"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "isGoalReached"
+  ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
     nameOrSignature: "pause"
   ): TypedContractMethod<[], [void], "nonpayable">;
@@ -988,77 +486,30 @@ export interface Campaign extends BaseContract {
     nameOrSignature: "paused"
   ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
-    nameOrSignature: "renounceOwnership"
+    nameOrSignature: "refund"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "submitMilestone"
-  ): TypedContractMethod<
-    [milestoneId: BigNumberish, evidenceIPFS: string],
-    [void],
-    "nonpayable"
-  >;
+    nameOrSignature: "state"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
-    nameOrSignature: "transferOwnership"
-  ): TypedContractMethod<[newOwner: AddressLike], [void], "nonpayable">;
+    nameOrSignature: "title"
+  ): TypedContractMethod<[], [string], "view">;
+  getFunction(
+    nameOrSignature: "totalRaised"
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "unpause"
   ): TypedContractMethod<[], [void], "nonpayable">;
   getFunction(
-    nameOrSignature: "vote"
-  ): TypedContractMethod<
-    [milestoneId: BigNumberish, support: boolean],
-    [void],
-    "nonpayable"
-  >;
+    nameOrSignature: "withdraw"
+  ): TypedContractMethod<[], [void], "nonpayable">;
 
   getEvent(
-    key: "CampaignStateChanged"
+    key: "Contributed"
   ): TypedContractEvent<
-    CampaignStateChangedEvent.InputTuple,
-    CampaignStateChangedEvent.OutputTuple,
-    CampaignStateChangedEvent.OutputObject
-  >;
-  getEvent(
-    key: "FundReceived"
-  ): TypedContractEvent<
-    FundReceivedEvent.InputTuple,
-    FundReceivedEvent.OutputTuple,
-    FundReceivedEvent.OutputObject
-  >;
-  getEvent(
-    key: "FundsReleased"
-  ): TypedContractEvent<
-    FundsReleasedEvent.InputTuple,
-    FundsReleasedEvent.OutputTuple,
-    FundsReleasedEvent.OutputObject
-  >;
-  getEvent(
-    key: "MilestoneCompleted"
-  ): TypedContractEvent<
-    MilestoneCompletedEvent.InputTuple,
-    MilestoneCompletedEvent.OutputTuple,
-    MilestoneCompletedEvent.OutputObject
-  >;
-  getEvent(
-    key: "MilestoneRejected"
-  ): TypedContractEvent<
-    MilestoneRejectedEvent.InputTuple,
-    MilestoneRejectedEvent.OutputTuple,
-    MilestoneRejectedEvent.OutputObject
-  >;
-  getEvent(
-    key: "MilestoneSubmitted"
-  ): TypedContractEvent<
-    MilestoneSubmittedEvent.InputTuple,
-    MilestoneSubmittedEvent.OutputTuple,
-    MilestoneSubmittedEvent.OutputObject
-  >;
-  getEvent(
-    key: "OwnershipTransferred"
-  ): TypedContractEvent<
-    OwnershipTransferredEvent.InputTuple,
-    OwnershipTransferredEvent.OutputTuple,
-    OwnershipTransferredEvent.OutputObject
+    ContributedEvent.InputTuple,
+    ContributedEvent.OutputTuple,
+    ContributedEvent.OutputObject
   >;
   getEvent(
     key: "Paused"
@@ -1068,18 +519,18 @@ export interface Campaign extends BaseContract {
     PausedEvent.OutputObject
   >;
   getEvent(
-    key: "RefundClaimed"
+    key: "Refunded"
   ): TypedContractEvent<
-    RefundClaimedEvent.InputTuple,
-    RefundClaimedEvent.OutputTuple,
-    RefundClaimedEvent.OutputObject
+    RefundedEvent.InputTuple,
+    RefundedEvent.OutputTuple,
+    RefundedEvent.OutputObject
   >;
   getEvent(
-    key: "ReservesReleased"
+    key: "StateChanged"
   ): TypedContractEvent<
-    ReservesReleasedEvent.InputTuple,
-    ReservesReleasedEvent.OutputTuple,
-    ReservesReleasedEvent.OutputObject
+    StateChangedEvent.InputTuple,
+    StateChangedEvent.OutputTuple,
+    StateChangedEvent.OutputObject
   >;
   getEvent(
     key: "Unpaused"
@@ -1089,89 +540,23 @@ export interface Campaign extends BaseContract {
     UnpausedEvent.OutputObject
   >;
   getEvent(
-    key: "VoteCast"
+    key: "Withdrawn"
   ): TypedContractEvent<
-    VoteCastEvent.InputTuple,
-    VoteCastEvent.OutputTuple,
-    VoteCastEvent.OutputObject
+    WithdrawnEvent.InputTuple,
+    WithdrawnEvent.OutputTuple,
+    WithdrawnEvent.OutputObject
   >;
 
   filters: {
-    "CampaignStateChanged(uint8,uint8)": TypedContractEvent<
-      CampaignStateChangedEvent.InputTuple,
-      CampaignStateChangedEvent.OutputTuple,
-      CampaignStateChangedEvent.OutputObject
+    "Contributed(address,uint256,uint256)": TypedContractEvent<
+      ContributedEvent.InputTuple,
+      ContributedEvent.OutputTuple,
+      ContributedEvent.OutputObject
     >;
-    CampaignStateChanged: TypedContractEvent<
-      CampaignStateChangedEvent.InputTuple,
-      CampaignStateChangedEvent.OutputTuple,
-      CampaignStateChangedEvent.OutputObject
-    >;
-
-    "FundReceived(address,uint256,uint8,uint256,uint256)": TypedContractEvent<
-      FundReceivedEvent.InputTuple,
-      FundReceivedEvent.OutputTuple,
-      FundReceivedEvent.OutputObject
-    >;
-    FundReceived: TypedContractEvent<
-      FundReceivedEvent.InputTuple,
-      FundReceivedEvent.OutputTuple,
-      FundReceivedEvent.OutputObject
-    >;
-
-    "FundsReleased(uint256,uint256,address)": TypedContractEvent<
-      FundsReleasedEvent.InputTuple,
-      FundsReleasedEvent.OutputTuple,
-      FundsReleasedEvent.OutputObject
-    >;
-    FundsReleased: TypedContractEvent<
-      FundsReleasedEvent.InputTuple,
-      FundsReleasedEvent.OutputTuple,
-      FundsReleasedEvent.OutputObject
-    >;
-
-    "MilestoneCompleted(uint256,uint256,uint256,uint256)": TypedContractEvent<
-      MilestoneCompletedEvent.InputTuple,
-      MilestoneCompletedEvent.OutputTuple,
-      MilestoneCompletedEvent.OutputObject
-    >;
-    MilestoneCompleted: TypedContractEvent<
-      MilestoneCompletedEvent.InputTuple,
-      MilestoneCompletedEvent.OutputTuple,
-      MilestoneCompletedEvent.OutputObject
-    >;
-
-    "MilestoneRejected(uint256,uint256,uint256,uint8)": TypedContractEvent<
-      MilestoneRejectedEvent.InputTuple,
-      MilestoneRejectedEvent.OutputTuple,
-      MilestoneRejectedEvent.OutputObject
-    >;
-    MilestoneRejected: TypedContractEvent<
-      MilestoneRejectedEvent.InputTuple,
-      MilestoneRejectedEvent.OutputTuple,
-      MilestoneRejectedEvent.OutputObject
-    >;
-
-    "MilestoneSubmitted(uint256,string,uint256)": TypedContractEvent<
-      MilestoneSubmittedEvent.InputTuple,
-      MilestoneSubmittedEvent.OutputTuple,
-      MilestoneSubmittedEvent.OutputObject
-    >;
-    MilestoneSubmitted: TypedContractEvent<
-      MilestoneSubmittedEvent.InputTuple,
-      MilestoneSubmittedEvent.OutputTuple,
-      MilestoneSubmittedEvent.OutputObject
-    >;
-
-    "OwnershipTransferred(address,address)": TypedContractEvent<
-      OwnershipTransferredEvent.InputTuple,
-      OwnershipTransferredEvent.OutputTuple,
-      OwnershipTransferredEvent.OutputObject
-    >;
-    OwnershipTransferred: TypedContractEvent<
-      OwnershipTransferredEvent.InputTuple,
-      OwnershipTransferredEvent.OutputTuple,
-      OwnershipTransferredEvent.OutputObject
+    Contributed: TypedContractEvent<
+      ContributedEvent.InputTuple,
+      ContributedEvent.OutputTuple,
+      ContributedEvent.OutputObject
     >;
 
     "Paused(address)": TypedContractEvent<
@@ -1185,26 +570,26 @@ export interface Campaign extends BaseContract {
       PausedEvent.OutputObject
     >;
 
-    "RefundClaimed(address,uint256,uint256)": TypedContractEvent<
-      RefundClaimedEvent.InputTuple,
-      RefundClaimedEvent.OutputTuple,
-      RefundClaimedEvent.OutputObject
+    "Refunded(address,uint256)": TypedContractEvent<
+      RefundedEvent.InputTuple,
+      RefundedEvent.OutputTuple,
+      RefundedEvent.OutputObject
     >;
-    RefundClaimed: TypedContractEvent<
-      RefundClaimedEvent.InputTuple,
-      RefundClaimedEvent.OutputTuple,
-      RefundClaimedEvent.OutputObject
+    Refunded: TypedContractEvent<
+      RefundedEvent.InputTuple,
+      RefundedEvent.OutputTuple,
+      RefundedEvent.OutputObject
     >;
 
-    "ReservesReleased(address,uint256)": TypedContractEvent<
-      ReservesReleasedEvent.InputTuple,
-      ReservesReleasedEvent.OutputTuple,
-      ReservesReleasedEvent.OutputObject
+    "StateChanged(uint8,uint8)": TypedContractEvent<
+      StateChangedEvent.InputTuple,
+      StateChangedEvent.OutputTuple,
+      StateChangedEvent.OutputObject
     >;
-    ReservesReleased: TypedContractEvent<
-      ReservesReleasedEvent.InputTuple,
-      ReservesReleasedEvent.OutputTuple,
-      ReservesReleasedEvent.OutputObject
+    StateChanged: TypedContractEvent<
+      StateChangedEvent.InputTuple,
+      StateChangedEvent.OutputTuple,
+      StateChangedEvent.OutputObject
     >;
 
     "Unpaused(address)": TypedContractEvent<
@@ -1218,15 +603,15 @@ export interface Campaign extends BaseContract {
       UnpausedEvent.OutputObject
     >;
 
-    "VoteCast(uint256,address,bool,uint256)": TypedContractEvent<
-      VoteCastEvent.InputTuple,
-      VoteCastEvent.OutputTuple,
-      VoteCastEvent.OutputObject
+    "Withdrawn(address,uint256)": TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
     >;
-    VoteCast: TypedContractEvent<
-      VoteCastEvent.InputTuple,
-      VoteCastEvent.OutputTuple,
-      VoteCastEvent.OutputObject
+    Withdrawn: TypedContractEvent<
+      WithdrawnEvent.InputTuple,
+      WithdrawnEvent.OutputTuple,
+      WithdrawnEvent.OutputObject
     >;
   };
 }
